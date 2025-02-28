@@ -2,7 +2,7 @@
 
 NumPy s_hape / s_trict typing – Module for special Numpy use cases.
 
-NumPy is intended for mathematical calculations. For this purpose, a special restriction of the form of arrays does not appear to be necessary. In the context of application and module programming for special libraries or entire applications, it can be useful for quality assurance purposes to restrict NumPy arrays as far as possible in terms of shape and data typing.
+NumPy is intended for mathematical calculations. For this purpose, a special restriction of the shape of arrays does not appear to be necessary. In the context of application and module programming for special libraries or entire applications, it can be useful for quality assurance purposes to restrict NumPy arrays as far as possible in terms of shape and data typing.
 
 There are two ways to implement typing in Python:
 
