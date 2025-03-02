@@ -25,29 +25,27 @@ if __debug__:
 
 # ############################################################
 #
-# ColonType
-# =========
+# Colon (Type)
+# ============
 #
 
 #
-# We use a helper "Meta" class in order to make isinstance(obj, ColonType)
-# more duck_typing.
-# Metaclass: _ColonType_Meta
-# ----------------------
+# We use a helper "Meta" class in order to make isinstance(obj, Colon)
+# more duck_typing: Can be a Colon object or a ":" string.
+# Metaclass: _Colon_Meta
+# --------------------------
 #
 
-class _ColonType_Meta(type):
+class _Colon_Meta(type):
     
     @classmethod
     def __instancecheck__(cls, obj):
         if DO_TYPECHECK:
             # We check for the content, a single valid sign:
             #       >>   ":"   <<
-            if type(obj) == _ColonType_Meta:
+            if isinstance(Colon):
                 return True
             elif obj == ":":
-                return True
-            elif obj == Literal[":"]:
                 return True
             return False
         return True # DO_TYPECHECK == False
@@ -74,16 +72,16 @@ class _ColonType_Meta(type):
             return value
         if DO_TYPECHECK:
             if value == ":":
-                return super().__call__() #  sind 2. we must not call super().__call__(value)
-            raise ValueError("Value is not a ColonType or a string of ':'.")
+                return super().__call__() #  since 2, we must not call super().__call__(value)
+            raise ValueError("Value is not a Colon (type class) or a string of ':'.")
         return super().__call__() # DO_TYPECHECK == False
 #
-# ColonType implementation
-# ------------------------
+# Colon implementation
+# --------------------
 #
 
-class ColonType(metaclass=_ColonType_Meta):
-    """Type for a string what allows only a colon."""
+class Colon(metaclass=_Colon_Meta):
+    """Class which is a type checked colon using in SType."""
 
     def __new__(cls):
         return cls
@@ -95,15 +93,90 @@ class ColonType(metaclass=_ColonType_Meta):
         return ":"
 
 #
-# Ending: ColonType
+# Ending: Colon (Type)
 #
 # ############################################################
+
+# ############################################################
+#
+# STypeLike
+# =========
+#
+# It is STypeLike if
+#   - it is SType
+#   - can be converted to SType
+#
+# To be fast in checking, we check in following order:
+#   - isinstance(..., SType)
+#   - is formatted as SType (tuple of...)
+#   - is convertible into SType (Any...)
+#
+
+class _STypeLike_Meta(type):
+    @classmethod
+    def __instancecheck__(cls, obj):
+        # Is instance of SType (includes None, bool, tuple and SType
+        # class, since its tested in _SType_Meta?
+        if isinstance(obj, SType):
+            return True
+        # is convertible into SType?
+        try:
+            SType(obj)
+        except:
+            return False
+        return True
+    
+#
+# SType_like implementation
+# --------------------
+#
+
+class SType_like(metaclass=_STypeLike_Meta):
+    """Class which is SType or can be converted into SType."""
+
+    def __init__(self, stype_like: Any):
+        if isinstance(stype_like, SType_like):
+            self._stype_like = stype_like
+        else:
+            raise ValueError("Value is not compatible with SType.")
+
+    def __new__(cls):
+        return cls
+    
+    def __repr__(self):
+        return self._stype_like
+    
+    def __str__(self):
+        return self._stype_like
+
+#
+# Ending: STypeLike
+#
+# ############################################################
+
 
 
 # ############################################################
 #
 # SType
 # =====
+#
+# In addition to the description of the shape itself, SType can also
+# describe special cases.
+#
+# The proper meaning is:
+#
+#   (":", 1) or other specifications – normal use case: Shape restriction.
+#
+# Additional meaning in context with sndarray use:
+#
+#   None – No restriction. Don't use the actual shape as new SType
+#          restriction. Wait until the shape constraint is
+#          set at a later point. Shape checks will be return True.
+#   True – Take the actual shape of the array and use it as constraint.
+#          This is a trigger: If set this to True, the value will
+#          be replaced by the actual array shape.
+#   False – Reserved for future use. No meaning
 #
 
 #
@@ -121,13 +194,16 @@ class _SType_Meta(type):
         # Thats the format after a _to_stype() call in SType.
         #
         if DO_TYPECHECK:
+            if isinstance(obj, None | bool):
+                # Special cases. It's ok.
+                return True
             if isinstance(obj, tuple):
                 if len(obj) > 0:        # tuple has elements
                     for element in obj:
                         if isinstance(element, int):
                             if element >= 0:
                                 continue    # element is non-negativ integer
-                        elif isinstance(element, ColonType):
+                        elif isinstance(element, Colon):
                             continue
                         # elif element == ":":
                         #     continue    # the last possible
@@ -157,24 +233,26 @@ class _SType_Meta(type):
 #
 
 class SType(metaclass=_SType_Meta):
-    """Shape format descriptor as type with conversion from less restrictec formats."""
+    """Shape format descriptor as type with conversion from less restricted formats."""
 
-    def __init__(self, any_shape_type: Any):
-        if not isinstance(any_shape_type, SType):
-            self._stype = self._to_stype(any_shape_type)
+    def __init__(self, stype_like: SType_like):
+        if not isinstance(stype_like, SType):
+            self._stype = self._to_stype(stype_like)
         else:
-            self._stype = any_shape_type
+            self._stype = stype_like
 
     @staticmethod
     def _to_stype(shape: Any) -> "SType":
-        """Make any object to SType as a more standadised writing of the strictly typed shape."""
-        # Note: Since we change a positive non-integer into signed intager by a loop and indexing
+        """Make any object to SType as a more standardised writing of the strictly typed shape."""
+        # Note: Since we change a positive non-integer into signed integer by a loop and indexing
         #       at the end, we create a list at first and convert it to a tuple at last. (Tuple
         #       elements can not be overwritten.)
         VALUE_ERROR_TXT = "Not a valid shape."
 
-        if DO_TYPECHECK:
-            if isinstance(shape, str):
+        if DO_TYPECHECK: # TODO: Wirklich abschalten im optimierten Mode?
+            if isinstance(shape, None | bool):
+                return shape
+            elif isinstance(shape, str):
                 try:
                     # we have a string with or without a list inside; have to convert
                     shape = re.sub(
