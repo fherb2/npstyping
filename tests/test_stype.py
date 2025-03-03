@@ -2,7 +2,7 @@
 
 import numpy as np
 import pytest
-
+from srcnpstyping.npstyping import Colon, STypeLike, SType, sndarray
 
 
 
@@ -34,11 +34,11 @@ def test__SType_Meta():
 #
 
 def test_ColonType_types():
-    assert type(ColonType) == _ColonType_Meta
-    a = ColonType
-    b = ColonType(":")
-    assert isinstance(a, ColonType)
-    assert isinstance(b, ColonType)
+    assert type(Colon) == _ColonType_Meta
+    a = Colon
+    b = Colon(":")
+    assert isinstance(a, Colon)
+    assert isinstance(b, Colon)
     
 @pytest.mark.parametrize("in1, out1", [  
         (":",           True),
@@ -48,7 +48,7 @@ def test_ColonType_types():
         (1,             False),
     ]) 
 def test_ColonType(in1, out1):
-    assert isinstance(in1, ColonType) == out1
+    assert isinstance(in1, Colon) == out1
 
 @pytest.mark.parametrize("in1", [  
         (";"),
@@ -56,7 +56,7 @@ def test_ColonType(in1, out1):
     ])
 def test_ColonType_value_error_exceptions(in1):
     with pytest.raises(ValueError):
-        ColonType(in1)
+        Colon(in1)
 
 
 #
