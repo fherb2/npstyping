@@ -1,3 +1,5 @@
 {
-    "idf.pythonInstallPath": "/home/herbrand/.venv3.10/bin/python"
+    "idf.pythonInstallPath": "/home/herbrand/.venv3.10/bin/python",
+    "autoDocstring.docstringFormat": "numpy",
+    "autoDocstring.generateDocstringOnEnter": true
 }
