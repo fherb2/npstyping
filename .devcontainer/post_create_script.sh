@@ -16,3 +16,5 @@ if [ ! -f ./.vscode/settings.json ] ; then
     echo '    "autoDocstring.generateDocstringOnEnter": true' >> ./.vscode/settings.json
     echo "}" >> ./.vscode/settings.json
 fi
+
+pip install pytest
