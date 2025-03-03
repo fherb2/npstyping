@@ -1,55 +1,103 @@
 import numpy as np
-from stype import SType, Colon
+from stype import SType, STypeLike, Colon
 from typing import Union
 from numpy.typing import ArrayLike
 from types import EllipsisType
 
+
+# ############################################################
+#
+# sndarray (shape typed numpy.ndarray)
+# ====================================
+#
+# Is a subclass of numpy.ndarray with additional:
+#
+#   -   stype   – Attribut. Saves a SType value as shape restriction
+#                 parameter to can be cecked every time against the
+#                 array of this numpy.ndarray subclass.
+#
+#   -   auto_stype_check – Attribute. If true, so an shape check
+#                          happens after each numpy operation.
+#
+#   -   Mechanism to keep the stype attribute in such cases where
+#       a numpy operation creates a new ndarray.
+#
+#   -   check_stype – Method to check the restriction of the shape
+#                     against the current array shape
+
+
 class sndarray(np.ndarray):
-    SHAPE_CHANGING_METHODS = {
-            "reshape", "resize", "transpose", "swapaxes",
-            "flatten", "ravel", "squeeze", "expand_dims"
-        }
     
-    @classmethod
-    def add_shape_changing_method(cls, method_name):
-        cls.SHAPE_CHANGING_METHODS.add(method_name)
-
-    @classmethod
-    def remove_shape_changing_method(cls, method_name):    
-        cls.SHAPE_CHANGING_METHODS.discard(method_name)
-
-    def __new__(cls, array_like, dtype:np.dtype = None, stype:SType = None, order = None, like=None):
+    def __new__(cls, array_like, dtype:np.dtype = None,
+                stype:SType = None, auto_stype_check:bool = False,
+                order = None, like=None):
         obj = np.asarray(array_like, dtype=dtype, order=order, like=like).view(cls)
-        obj.stype = SType(stype)
+        obj._stype = SType(stype)
+        assert isinstance(auto_stype_check, bool | None), ValueError("Argument 'auto_stype_check' has wrong data type (not a boolean).")
+        obj._auto_stype_check = auto_stype_check
+            
         return obj
     
     def __array_finalize__(self, obj):
         if obj is None:
             return None
-        self.stype = getattr(obj, 'stype', None)
+        self.stype = getattr(obj, '_stype', None) # we use the setter method to get
+                                                  # the boolean-True behaviour
+        self._auto_stype_check = getattr(obj, '_auto_stype_check', None)
+        
+    @property
+    def stype(self):
+        return self._stype
+    
+    @stype.setter
+    def stype(self, stype_like: STypeLike | bool):
+        if isinstance(stype_like, bool):
+            if stype_like:
+                # its boolean 'True'; means: Take array's current shape as stype.
+                self._stype = self.shape
+        else:
+            # should be an stype_like shape contraint
+            self._stype = SType(stype_like)
+            
+    @property
+    def auto_stype_check(self):
+        return self._auto_stype_check
+    
+    @auto_stype_check.setter
+    def auto_stype_check(self, auto_stype_check:bool):
+        assert isinstance(auto_stype_check, bool | None), ValueError("Argument 'auto_stype_check' has wrong data type (not a boolean).")
+        self._auto_stype_check = auto_stype_check
+            
+    def check_stype(self, stype_like: STypeLike | None = None, auto_stype_check:bool = False):
+        if stype_like is not None:
+            self.stype = stype_like
+            assert isinstance(auto_stype_check, bool | None), ValueError("Argument 'auto_stype_check' has wrong data type (not a boolean).")
+            self._auto_stype_check = auto_stype_check
+    
+    #
+    # parts of code to implement 'auto-check' and 'keep stype' behaviour
+    # ------------------------------------------------------------------
+    #
 
-    def post_process(self):
-        print("POST-PROCESS")
-
+    # implement the process into all of numpy operations
     def __getattribute__(self, name):
         attr = super().__getattribute__(name)
 
-        if callable(attr) and name in self.SHAPE_CHANGING_METHODS:
-
+        if callable(attr):
+            # an dieser Stelle könnte es noch einen Iterationsfehler geben: Darf nicht beim Erzeugen
+            # oder initialisieren der Klasse aufgerufen werden.
             def wrapper_method(*args, **kwargs):
-                old_shape = self.shape 
                 result = attr(*args, **kwargs)
-                new_shape = result.shape if isinstance(result, np.ndarray) else None
+                if isinstance(result, np.ndarray):
+                    result = sndarray(result, dtype=result.dtype,
+                                      stype=self._stype, auto_stype_check=self._auto_stype_check)
+                if self._auto_stype_check:
+                    result.check_stype()
 
-                if new_shape and new_shape != old_shape:
-                    if isinstance(result, sndarray):
-                        result.post_process()
-                else:
-                    return result
-            
+                return result
+        
             return wrapper_method
-        else:
-            return attr
+        return attr
     
 
 arr = sndarray([1,2])

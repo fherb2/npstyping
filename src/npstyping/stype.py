@@ -33,7 +33,7 @@ if __debug__:
 # We use a helper "Meta" class in order to make isinstance(obj, Colon)
 # more duck_typing: Can be a Colon object or a ":" string.
 # Metaclass: _Colon_Meta
-# --------------------------
+# ----------------------
 #
 
 class _Colon_Meta(type):
@@ -75,6 +75,7 @@ class _Colon_Meta(type):
                 return super().__call__() #  since 2, we must not call super().__call__(value)
             raise ValueError("Value is not a Colon (type class) or a string of ':'.")
         return super().__call__() # DO_TYPECHECK == False
+    
 #
 # Colon implementation
 # --------------------
@@ -103,7 +104,7 @@ class Colon(metaclass=_Colon_Meta):
 # =========
 #
 # It is STypeLike if
-#   - it is SType
+#   - it is SType or STypeLike object
 #   - can be converted to SType
 #
 # To be fast in checking, we check in following order:
@@ -117,7 +118,7 @@ class _STypeLike_Meta(type):
     def __instancecheck__(cls, obj):
         # Is instance of SType (includes None, bool, tuple and SType
         # class, since its tested in _SType_Meta?
-        if isinstance(obj, SType):
+        if isinstance(obj, SType, STypeLike):
             return True
         # is convertible into SType?
         try:
@@ -131,17 +132,17 @@ class _STypeLike_Meta(type):
 # --------------------
 #
 
-class SType_like(metaclass=_STypeLike_Meta):
+class STypeLike(metaclass=_STypeLike_Meta):
     """Class which is SType or can be converted into SType."""
 
     def __init__(self, stype_like: Any):
-        if isinstance(stype_like, SType_like):
+        if isinstance(stype_like, STypeLike):
             self._stype_like = stype_like
         else:
             raise ValueError("Value is not compatible with SType.")
 
-    def __new__(cls):
-        return cls
+    # def __new__(cls):
+    #     return cls
     
     def __repr__(self):
         return self._stype_like
@@ -162,11 +163,11 @@ class SType_like(metaclass=_STypeLike_Meta):
 # =====
 #
 # In addition to the description of the shape itself, SType can also
-# describe special cases.
+# describe special cases as sndarray parameter.
 #
 # The proper meaning is:
 #
-#   (":", 1) or other specifications – normal use case: Shape restriction.
+#   (":", 1) or other specifications – normal use case as: Shape restriction.
 #
 # Additional meaning in context with sndarray use:
 #
@@ -178,10 +179,48 @@ class SType_like(metaclass=_STypeLike_Meta):
 #          be replaced by the actual array shape.
 #   False – Reserved for future use. No meaning
 #
+# Values
+# ------
+# 
+#   - stype – Value in the right format and usable as shape type in sndarray
+#             and to check a numpy.ndarray directly for a special shape.
+#             The "right format" is a tuple of elements of type
+#               - integer with value >= 0
+#               - EllipsisType '...'
+#               - Colon (":").
+#             And Ellipsis may be only the first or/and the last element in
+#             tuple.
+#
+# Methods
+# -------
+#
+#   -   SType   – (defined as: __new__() ); get a SType class
+#
+#   -   SType(value: STypeLike) (defines as __init__() );  returns a SType class instance 
+#                 with initialized value 'stype'
+#
+#   -   check_ndarray() – check a NumPy (like) array against the shape type 'stype'
+#
+# Since value 'stype' is a tuple, we handle it as a tuple also:
+#   -   __iter__()
+#   -   __getitem__()
+#   -   __len__()
+#   -   __contains__()
+# 
+#   -   __str__()   – value 'stype' as string
+#
+#   -   __repr__()  – representation of the value 'stype' as tuple
+#
+#   -   __eq__()    – equal compare function; is equal if it is equal with the
+#                     stype attribute of a SType object or a tuple with the
+#                     correct content in the sense of SType (duck-typing manner)
+#
+#   -   _to_stype() – internal helper: converts an STypeLike object into SType
 
 #
-# We need a helper "Meta" class in order to make isinstance(obj, SType)
+# We use a helper "Meta" class in order to make isinstance(obj, SType)
 # more duck_typing.
+#
 # Metaclass: _SType_Meta
 # ----------------------
 #
@@ -235,14 +274,22 @@ class _SType_Meta(type):
 class SType(metaclass=_SType_Meta):
     """Shape format descriptor as type with conversion from less restricted formats."""
 
-    def __init__(self, stype_like: SType_like):
+    def __init__(self, stype_like: STypeLike):
         if not isinstance(stype_like, SType):
             self._stype = self._to_stype(stype_like)
         else:
             self._stype = stype_like
+            
+    @property
+    def stype(self, stype_like:STypeLike):
+        self._stype = self._to_stype(stype_like)
+        
+    @stype.getter
+    def stype(self):
+        return self._stype
 
     @staticmethod
-    def _to_stype(shape: Any) -> "SType":
+    def _to_stype(shape: STypeLike) -> "SType":
         """Make any object to SType as a more standardised writing of the strictly typed shape."""
         # Note: Since we change a positive non-integer into signed integer by a loop and indexing
         #       at the end, we create a list at first and convert it to a tuple at last. (Tuple
@@ -368,32 +415,7 @@ class SType(metaclass=_SType_Meta):
                 shape[i] = int(shape[i])
                 continue
             return tuple(shape)
-            
-    def __repr__(self):
-        return repr(self._stype)
-    
-    def __eq__(self, other):
-        if isinstance(other, tuple):
-            return self._stype == other
-        if isinstance(other, SType):
-            return self._stype == other._stype
-        return False
-    
-    def __iter__(self):
-        return iter(self._stype)
-    
-    def __getitem__(self, index):
-        return self._stype[index]
-    
-    def __len__(self):
-        return len(self._stype)
-    
-    def __str__(self):
-        return str(self._stype)
-    
-    def __contains__(self, item):
-        return item in self._stype
-    
+
     def check_ndarray(self, array: ArrayLike) -> bool:
         if isinstance(array, np.ndarray):
             a_shape = array.shape
@@ -431,6 +453,32 @@ class SType(metaclass=_SType_Meta):
 
         # if we are here, so shape is ok
         return True
+            
+    def __repr__(self):
+        return repr(self._stype)
+    
+    def __eq__(self, other):
+        if isinstance(other, tuple):
+            return self._stype == other
+        if isinstance(other, SType):
+            return self._stype == other._stype
+        return False
+    
+    def __iter__(self):
+        return iter(self._stype)
+    
+    def __getitem__(self, index):
+        return self._stype[index]
+    
+    def __len__(self):
+        return len(self._stype)
+    
+    def __str__(self):
+        return str(self._stype)
+    
+    def __contains__(self, item):
+        return item in self._stype
+    
 
 #
 # Ending: SType

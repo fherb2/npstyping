@@ -3,9 +3,9 @@
     //       This differs from the JSON standard. The standard doesn't know any comments sadly.
 
     // The name of the container created by VSCode with this configuration:
-    "name": "dresdyn_data_backend_vscode_development",
+    "name": "npstyping_vscode_development",
     // The image to create the container:
-    "image": "registry.hzdr.de/fwf/libraries/dockerfiles/devcontainers-python-cuda-imageprocessing/npstyping-dev:latest",
+    "image": "registry.hzdr.de/fwf/libraries/dockerfiles/devcontainers-python-cuda-imageprocessing/npstyping-dev:day-25.03.03",
 
     // see: https://code.visualstudio.com/remote/advancedcontainers/start-processes
     // -> "When referencing a Dockerfile in devcontainer.json, the default entrypoint
