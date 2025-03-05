@@ -493,7 +493,7 @@ class SType(metaclass=_SType_Meta):
 #                 parameter to can be cecked every time against the
 #                 array of this numpy.ndarray subclass.
 #
-#   -   auto_stype_check – Attribute. If true, so an shape check
+#   -   auto_stype_check – Attribute. If true, so a shape check
 #                          happens after each numpy operation.
 #
 #   -   Mechanism to keep the stype attribute in such cases where
@@ -532,9 +532,12 @@ class sndarray(np.ndarray):
             if stype_like:
                 # its boolean 'True'; means: Take array's current shape as stype.
                 self._stype = self.shape
+            # 'False' has no meaning.
         else:
-            # should be an stype_like shape contraint
+            # should be a stype_like shape contraint
             self._stype = SType(stype_like)
+            if self._auto_stype_check:
+                self._stype.check_ndarray(self)
             
     @property
     def auto_stype_check(self):
