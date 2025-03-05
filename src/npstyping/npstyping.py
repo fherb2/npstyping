@@ -40,7 +40,7 @@ class _Colon_Meta(type):
         if DO_TYPECHECK:
             # We check for the content, a single valid sign:
             #       >>   ":"   <<
-            if type(obj) == Colon:
+            if isinstance(obj, cls):
                 return True
             elif obj == ":":
                 return True
