@@ -37,15 +37,13 @@ class _Colon_Meta(type):
     
     @classmethod
     def __instancecheck__(cls, obj):
-        if DO_TYPECHECK:
-            # We check for the content, a single valid sign:
-            #       >>   ":"   <<
-            if isinstance(obj, cls):
-                return True
-            elif obj == ":":
-                return True
-            return False
-        return True # DO_TYPECHECK == False
+        # We check for the content, a single valid sign:
+        #       >>   ":"   <<
+        if isinstance(obj, cls):
+            return True
+        elif obj == ":":
+            return True
+        return False
     
     # The most simple form of __call__(cls, *args, **kwargs) looks like:
     #
@@ -67,11 +65,9 @@ class _Colon_Meta(type):
             value = kwargs['colon']
         if isinstance(value, cls):
             return value
-        if DO_TYPECHECK:
-            if value == ":":
-                return super().__call__() #  since 2, we must not call super().__call__(value)
-            raise ValueError("Value is not a Colon (type class) or a string of ':'.")
-        return super().__call__() # DO_TYPECHECK == False
+        if value == ":":
+            return super().__call__() #  since 2, we must not call super().__call__(value)
+        raise ValueError("Value is not a Colon (type class) or a string of ':'.")
     
 #
 # Colon implementation
@@ -132,7 +128,7 @@ class _STypeLike_Meta(type):
 class STypeLike(metaclass=_STypeLike_Meta):
     """Class which is SType or can be converted into SType."""
 
-    def __init__(self, stype_like: Any):
+    def __init__(self, stype_like: "STypeLike"):
         if isinstance(stype_like, STypeLike):
             self._stype_like = stype_like
         else:
@@ -229,30 +225,28 @@ class _SType_Meta(type):
         #      >>   (tuple[int >= 0, ColonType, EllipsisType])   <<
         # Thats the format after a _to_stype() call in SType.
         #
-        if DO_TYPECHECK:
-            if isinstance(obj, None | bool):
-                # Special cases. It's ok.
-                return True
-            if isinstance(obj, tuple):
-                if len(obj) > 0:        # tuple has elements
-                    for element in obj:
-                        if isinstance(element, int):
-                            if element >= 0:
-                                continue    # element is non-negativ integer
-                        elif isinstance(element, Colon):
-                            continue
-                        # elif element == ":":
-                        #     continue    # the last possible
-                        elif isinstance(element, EllipsisType):
-                            continue    # element ok: Ellipsis
-                        else:
-                            False       # element is not valid :-(
-                else:
-                    return False        # tuple is empty :-(
+        if isinstance(obj, None | bool):
+            # Special cases. It's ok.
+            return True
+        if isinstance(obj, tuple):
+            if len(obj) > 0:        # tuple has elements
+                for element in obj:
+                    if isinstance(element, int):
+                        if element >= 0:
+                            continue    # element is non-negativ integer
+                    elif isinstance(element, Colon):
+                        continue
+                    # elif element == ":":
+                    #     continue    # the last possible
+                    elif isinstance(element, EllipsisType):
+                        continue    # element ok: Ellipsis
+                    else:
+                        False       # element is not valid :-(
             else:
-                return False            # no tuple :-(
-            return True                 # Done: Ok. :-)
-        return True # DO_TYPECHECK == False
+                return False        # tuple is empty :-(
+        else:
+            return False            # no tuple :-(
+        return True                 # Done: Ok. :-)
     
     def __call__(cls, *args, **kwargs): # Don't write pragma @classmethod before!
         if not args and not kwargs:
@@ -278,12 +272,12 @@ class SType(metaclass=_SType_Meta):
             self._stype = stype_like
             
     @property
-    def stype(self, stype_like:STypeLike):
-        self._stype = self._to_stype(stype_like)
-        
-    @stype.getter
     def stype(self):
         return self._stype
+        
+    @stype.getter
+    def stype(self, stype_like:STypeLike):
+        self._stype = self._to_stype(stype_like)
 
     @staticmethod
     def _to_stype(shape: STypeLike) -> "SType":
@@ -293,94 +287,16 @@ class SType(metaclass=_SType_Meta):
         #       elements can not be overwritten.)
         VALUE_ERROR_TXT = "Not a valid shape."
 
-        if DO_TYPECHECK: # TODO: Wirklich abschalten im optimierten Mode?
-            if isinstance(shape, None | bool):
-                return shape
-            elif isinstance(shape, str):
-                try:
-                    # we have a string with or without a list inside; have to convert
-                    shape = re.sub(
-                        r"[\[\(\)\] ]", "", shape
-                    )  # remove list/tuple brackets ans spaces
-                    if (
-                        len(re.sub("[0-9:.,]", "", shape)) > 0
-                    ):  # mask signs which should not be in the string
-                        raise ValueError(VALUE_ERROR_TXT)
-                    shape = shape.split(",")
-                    new_shape = []
-                    for element in shape:
-                        if element == "":
-                            continue
-                        elif element == ":":
-                            new_shape.append(":")
-                            continue
-                        elif element == "...":
-                            new_shape.append(...)
-                            continue
-                        # now we make it safe to have a really index integer and not a floating point value
-                        # or negative values
-                        if float(element) != abs(int(element)):
-                            raise ValueError(VALUE_ERROR_TXT)
-                        new_shape.append(int(element))
-                    shape = new_shape
-                except:
-                    raise ValueError(VALUE_ERROR_TXT)
-            # we have no string, so we could have: int | str | list[str|int|EllipsisType] | tuple[str|int|EllipsisType]
-            elif not isinstance(shape, list | tuple):
-                # this should be a single value:
-                #   - unsigned integer
-                #   - floating point, interpretable as unsigned integer
-                #   - ellipsis
-                try:
-                    if isinstance(shape, EllipsisType):
-                        shape = [...]
-                    elif int(shape) >= 0:
-                        shape = [int(shape)]
-                    else:
-                        raise ValueError(VALUE_ERROR_TXT)
-                except:
-                    ValueError(VALUE_ERROR_TXT)
-            elif isinstance(shape, tuple):
-                try:
-                    shape = list(shape)
-                except:
-                    ValueError(VALUE_ERROR_TXT)
-            # we should have a tuple now; but maybe with wrong content
-            ellipsis_cnt = 0
+        if isinstance(shape, None | bool):
+            return shape
+        elif isinstance(shape, str):
             try:
-                for i in range(len(shape)):
-                    if isinstance(shape[i], EllipsisType):
-                        if (i == 0) or (i == len(shape) - 1):
-                            ellipsis_cnt += 1
-                            continue
-                        else:
-                            raise ValueError(VALUE_ERROR_TXT)
-                    elif shape[i] == ":":
-                        continue
-                    # now we make it safe to have a really index integer and not a floating point value
-                    # or negative values
-                    elif isinstance(shape[i], int):
-                        if shape[i] < 0:
-                            raise ValueError(VALUE_ERROR_TXT)
-                        shape[i] = int(shape[i])
-                        continue
-                    else:
-                        raise ValueError(VALUE_ERROR_TXT)
-                if ellipsis_cnt > 1:
-                    raise ValueError(VALUE_ERROR_TXT)
-            except:
-                raise ValueError(VALUE_ERROR_TXT)
-            return tuple(shape)
-        else: 
-            # DO_TYPECHECK == False
-            # -> We do the same but without checks.
-            # This code part is copied from above after testing and shortened
-            # but hast to test with __debug__ == False (optimize flag of Python)
-            if isinstance(shape, str):
                 # we have a string with or without a list inside; have to convert
-                shape = re.sub(
-                    r"[\[\(\)\] ]", "", shape
-                )  # remove list/tuple brackets ans spaces
+                shape = re.sub(r"[\[\(\)\] ]", "", shape)  # remove list/tuple brackets ans spaces
+                if (
+                    len(re.sub("[0-9:.,]", "", shape)) > 0
+                ):  # mask signs which should not be in the string
+                    raise ValueError(VALUE_ERROR_TXT)
                 shape = shape.split(",")
                 new_shape = []
                 for element in shape:
@@ -388,30 +304,65 @@ class SType(metaclass=_SType_Meta):
                         continue
                     elif element == ":":
                         new_shape.append(":")
+                        continue
                     elif element == "...":
                         new_shape.append(...)
-                    else:
-                        new_shape.append(int(element))
+                        continue
+                    # now we make it safe to have a really index integer and not a floating point value
+                    # or negative values
+                    if float(element) != abs(int(element)):
+                        raise ValueError(VALUE_ERROR_TXT)
+                    new_shape.append(int(element))
                 shape = new_shape
-            elif not isinstance(shape, list | tuple):
-                # this should be a single value:
-                #   - unsigned integer
-                #   - floating point, interpretable as unsigned integer
-                #   - ellipsis
+            except:
+                raise ValueError(VALUE_ERROR_TXT)
+        # we have no string, so we could have: int | str | list[str|int|EllipsisType] | tuple[str|int|EllipsisType]
+        elif not isinstance(shape, list | tuple):
+            # this should be a single value:
+            #   - unsigned integer
+            #   - floating point, interpretable as unsigned integer
+            #   - ellipsis
+            try:
                 if isinstance(shape, EllipsisType):
                     shape = [...]
-                else:
+                elif int(shape) >= 0:
                     shape = [int(shape)]
-            else:
+                else:
+                    raise ValueError(VALUE_ERROR_TXT)
+            except:
+                ValueError(VALUE_ERROR_TXT)
+        elif isinstance(shape, tuple):
+            try:
                 shape = list(shape)
+            except:
+                ValueError(VALUE_ERROR_TXT)
+        # we should have a tuple now; but maybe with wrong content
+        ellipsis_cnt = 0
+        try:
             for i in range(len(shape)):
                 if isinstance(shape[i], EllipsisType):
-                    continue
+                    if (i == 0) or (i == len(shape) - 1):
+                        ellipsis_cnt += 1
+                        continue
+                    else:
+                        raise ValueError(VALUE_ERROR_TXT)
                 elif shape[i] == ":":
                     continue
-                shape[i] = int(shape[i])
-                continue
-            return tuple(shape)
+                # now we make it safe to have a really index integer and not a floating point value
+                # or negative values
+                elif isinstance(shape[i], int):
+                    if shape[i] < 0:
+                        raise ValueError(VALUE_ERROR_TXT)
+                    shape[i] = int(shape[i])
+                    continue
+                else:
+                    raise ValueError(VALUE_ERROR_TXT)
+            if ellipsis_cnt > 1:
+                raise ValueError(VALUE_ERROR_TXT)
+        except:
+            raise ValueError(VALUE_ERROR_TXT)
+        return tuple(shape)
+
 
     def check_ndarray(self, array: ArrayLike) -> bool:
         if isinstance(array, np.ndarray):

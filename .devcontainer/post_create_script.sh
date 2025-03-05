@@ -5,6 +5,7 @@
 
 if $IS_POETRY; then
     ## Configure poetry
+    poetry config virtualenvs.in-project true
     poetry install --with dev, docs
     poetry run pre-commit install
 fi
