@@ -1,6 +1,14 @@
 import numpy as np
 import pytest
-from npstyping import Colon, STypeLike, SType, sndarray
+from typing import Literal
+
+from npstyping.npstyping import _Colon_Meta, \
+                                Colon, \
+                                _STypeLike_Meta, \
+                                STypeLike, \
+                                _SType_Meta, \
+                                SType, \
+                                sndarray
 
 
 # ############################################
@@ -10,8 +18,9 @@ from npstyping import Colon, STypeLike, SType, sndarray
 #
 
 def test_ColonType_types():
-    assert type(Colon) == _ColonType_Meta
+    assert type(Colon) == _Colon_Meta
     a = Colon
+    b = Colon(a)
     b = Colon(":")
     assert isinstance(a, Colon)
     assert isinstance(b, Colon)

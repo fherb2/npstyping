@@ -2,6 +2,13 @@
 
 # Runs (only) if the container is (re-)build
 # ==========================================
+
+if $IS_POETRY; then
+    ## Configure poetry
+    poetry install --with dev, docs
+    poetry run pre-commit install
+fi
+
 # Create a directory /.vscode in your workspace if not present
 if [ ! -d ./.vscode  ] ; then
     mkdir ./.vscode
@@ -17,4 +24,3 @@ if [ ! -f ./.vscode/settings.json ] ; then
     echo "}" >> ./.vscode/settings.json
 fi
 
-pip install pytest

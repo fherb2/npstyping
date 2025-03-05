@@ -2,9 +2,13 @@
 
 import numpy as np
 import pytest
-from srcnpstyping.npstyping import Colon, STypeLike, SType, sndarray
-
-
+from typing import Literal
+from npstyping.npstyping import Colon, \
+                                _Colon_Meta, \
+                                STypeLike, \
+                                _SType_Meta, \
+                                SType, \
+                                sndarray
 
 # ############################################
 #
@@ -14,7 +18,7 @@ from srcnpstyping.npstyping import Colon, STypeLike, SType, sndarray
 
 # This class works as template. We test it with the
 # implementation of class 'ColonType'
-def test__ColonType_Meta():
+def test__Colon_Meta():
     pass
 
 # This class works as template. We test it with the
@@ -34,7 +38,7 @@ def test__SType_Meta():
 #
 
 def test_ColonType_types():
-    assert type(Colon) == _ColonType_Meta
+    assert type(Colon) == _Colon_Meta
     a = Colon
     b = Colon(":")
     assert isinstance(a, Colon)

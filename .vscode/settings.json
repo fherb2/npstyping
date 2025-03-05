@@ -1,5 +1,10 @@
 {
     "idf.pythonInstallPath": "/home/herbrand/.venv3.10/bin/python",
     "autoDocstring.docstringFormat": "numpy",
-    "autoDocstring.generateDocstringOnEnter": true
+    "autoDocstring.generateDocstringOnEnter": true,
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }
