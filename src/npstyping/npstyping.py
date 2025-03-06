@@ -1,5 +1,6 @@
 import re
 from types import EllipsisType
+from typing import Literal
 import numpy as np
 from numpy.typing import ArrayLike
 
@@ -10,9 +11,17 @@ from numpy.typing import ArrayLike
 # ===============================
 #
 
+# TODO: Look if we have to use it (or asserts instead)
 DO_TYPECHECK = False
 if __debug__:
     DO_TYPECHECK = True
+
+NPOrder = Literal["C", "F", "A", "K"]
+
+
+class ShapeError(Exception):
+    pass
+
 
 #
 # Ending: Common / simple type definitions, Constants
@@ -503,9 +512,6 @@ class SType(metaclass=_SType_Meta):
 #                 parameter to can be cecked every time against the
 #                 array of this numpy.ndarray subclass.
 #
-#   -   auto_stype_check – Attribute. If true, so a shape check
-#                          happens after each numpy operation.
-#
 #   -   Mechanism to keep the stype attribute in such cases where
 #       a numpy operation creates a new ndarray.
 #
@@ -516,66 +522,57 @@ class SType(metaclass=_SType_Meta):
 class sndarray(np.ndarray):
     def __new__(
         cls,
-        array_like,
+        a: ArrayLike,
         dtype: np.dtype = None,
-        stype: SType = None,
-        auto_stype_check: bool = False,
-        order=None,
-        like=None,
+        order: NPOrder | None = None,
+        *,
+        stype: STypeLike | None = None,
+        device: str | None = None,
+        copy: bool | None = None,
+        like: ArrayLike | None = None,
     ):
-        obj = np.asarray(array_like, dtype=dtype, order=order, like=like).view(cls)
-        obj._stype = SType(stype)
-        assert isinstance(auto_stype_check, bool | None), ValueError(
-            "Argument 'auto_stype_check' has wrong data type (not a boolean)."
+        # Create the numpy array
+        obj = np.asarray(a, dtype, order, device=device, copy=copy, like=like).view(cls)
+        # Add additional properties
+        assert isinstance(stype, STypeLike), ValueError(
+            "Argument 'stype' has wrong data type (not a STypeLike)."
         )
-        obj._auto_stype_check = auto_stype_check
-
+        obj._stype = SType(stype)
         return obj
 
     def __array_finalize__(self, obj):
         if obj is None:
             return None
-        self.stype = getattr(obj, "_stype", None)  # we use the setter method to get
-        # the boolean-True behaviour
-        self._auto_stype_check = getattr(obj, "_auto_stype_check", None)
+        # during setting of stype following
+        self.stype = getattr(obj, "_stype", None)
 
     @property
     def stype(self):
         return self._stype
 
     @stype.setter
-    def stype(self, stype_like: STypeLike | bool):
+    def stype(self, stype_like: STypeLike | bool | None):
+        if stype_like is None:
+            self._stype = None
+            return
         if isinstance(stype_like, bool):
             if stype_like:
                 # its boolean 'True'; means: Take array's current shape as stype.
                 self._stype = self.shape
             # 'False' has no meaning.
-        else:
-            # should be a stype_like shape contraint
-            self._stype = SType(stype_like)
-            if self._auto_stype_check:
-                self._stype.check_ndarray(self)
-
-    @property
-    def auto_stype_check(self):
-        return self._auto_stype_check
-
-    @auto_stype_check.setter
-    def auto_stype_check(self, auto_stype_check: bool):
-        assert isinstance(auto_stype_check, bool | None), ValueError(
-            "Argument 'auto_stype_check' has wrong data type (not a boolean)."
+            return
+        assert isinstance(stype_like, STypeLike), ValueError(
+            "'stype_like' has wrong data type."
         )
-        self._auto_stype_check = auto_stype_check
+        self._stype = SType(stype_like)
 
-    def check_stype(
-        self, stype_like: STypeLike | None = None, auto_stype_check: bool = False
-    ):
+    def check_stype(self, stype_like: STypeLike | None = None) -> bool:
         if stype_like is not None:
-            self.stype = stype_like
-            assert isinstance(auto_stype_check, bool | None), ValueError(
-                "Argument 'auto_stype_check' has wrong data type (not a boolean)."
+            assert isinstance(stype_like, STypeLike), ValueError(
+                "Parameter 'stype_like' is not STypeLike."
             )
-            self._auto_stype_check = auto_stype_check
+            self._stype = SType(stype_like)
+        return self._stype.check_ndarray(self.__array__(copy=False))
 
     #
     # parts of code to implement 'auto-check' and 'keep stype' behaviour
@@ -587,20 +584,17 @@ class sndarray(np.ndarray):
         attr = super().__getattribute__(name)
 
         if callable(attr):
-            # an dieser Stelle könnte es noch einen Iterationsfehler geben: Darf nicht beim Erzeugen
-            # oder initialisieren der Klasse aufgerufen werden.
+
             def wrapper_method(*args, **kwargs):
                 result = attr(*args, **kwargs)
                 if isinstance(result, np.ndarray):
+                    if hasattr(result, "device"):
+                        device = result.device
+                    else:
+                        device = "cpu"
                     result = sndarray(
-                        result,
-                        dtype=result.dtype,
-                        stype=self._stype,
-                        auto_stype_check=self._auto_stype_check,
+                        a=result, dtype=result.dtype, stype=self._stype, device=device
                     )
-                if self._auto_stype_check:
-                    result.check_stype()
-
                 return result
 
             return wrapper_method

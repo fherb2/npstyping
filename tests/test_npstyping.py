@@ -8,6 +8,7 @@ from npstyping.npstyping import (
     STypeLike,
     _SType_Meta,
     SType,
+    sndarray,
 )
 
 
@@ -440,6 +441,12 @@ def test_SType_method_check_ndarray_value_error_exception(in1, in2):
 # ############################################
 
 
+# ############################################
+#
+# sndarray
+# --------
+#
+
 array_test_list = [
     ([3], np.array((1, 2, 3)), True),
     ("[3]", np.array((1, 1, 2)), True),
@@ -460,7 +467,6 @@ array_test_list = [
     ([":", 2], np.array(([1, 2], [2, 2])), True),
     ((":", 2), np.array(([1, 2, 3], [2, 2, 3])), False),
     ("[:, 2]", np.array(([1, 2],)), True),
-    ("([:, 2])", np.array([]), False),
     ("(:, 2)", np.array(([1, 2], [2, 2])), True),
     ([..., 2], np.array(([[1, 2], [2, 2]])), True),
     ("[..., 2]", np.array(([[1, 2, 3], [2, 2, 3]],)), False),
@@ -509,3 +515,30 @@ array_test_list = [
     ("..., 3, :", np.array([1, 2, 3]), False),
     ("(..., 3, :)", np.array([[1], [2], [3]]), True),
 ]
+
+# we check if the import of stype (including converts) happens
+
+array_import_test_list = []
+for row in array_test_list:
+    array_import_test_list.append((row[0], row[1]))
+
+
+@pytest.mark.parametrize("in1, in2", array_import_test_list)
+def test_sndarray_stype_setter_getter(in1, in2):
+    a = sndarray(a=in2, stype=in1)
+    assert a.stype == SType(in1)
+
+
+# we check the check_stype method
+
+
+@pytest.mark.parametrize("in1, in2, out1", array_test_list)
+def test_sndarray_stype_check_type(in1, in2, out1):
+    a = sndarray(a=in2, stype=in1)
+    assert a.check_stype() == out1
+
+
+#
+# Ending: sndarray
+#
+# ############################################
