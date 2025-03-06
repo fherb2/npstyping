@@ -531,7 +531,6 @@ def test_sndarray_stype_setter_getter(in1, in2):
 
 # we check the check_stype method
 
-
 @pytest.mark.parametrize("in1, in2, out1", array_test_list)
 def test_sndarray_stype_check_type(in1, in2, out1):
     a = sndarray(a=in2, stype=in1)

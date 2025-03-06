@@ -41,7 +41,6 @@ class ShapeError(Exception):
 # ----------------------
 #
 
-
 class _Colon_Meta(type):
     @classmethod
     def __instancecheck__(cls, obj):
@@ -79,15 +78,17 @@ class _Colon_Meta(type):
             )  #  since 2, we must not call super().__call__(value)
         raise ValueError("Value is not a Colon (type class) or a string of ':'.")
 
-
 #
 # Colon implementation
 # --------------------
 #
 
-
 class Colon(metaclass=_Colon_Meta):
-    """Class which is a type checked colon using in SType."""
+    """Colon using in SType.
+    
+    Class can be used to check for a colon independing the colon
+    from this class or Literal[":"] by using isinstance(). 
+    """
 
     def __new__(cls):
         return cls
@@ -97,7 +98,6 @@ class Colon(metaclass=_Colon_Meta):
 
     def __str__(self):
         return ":"
-
 
 #
 # Ending: Colon (Type)
@@ -122,7 +122,7 @@ class Colon(metaclass=_Colon_Meta):
 
 class _STypeLike_Meta(type):
     @staticmethod
-    def _filter_brackets_spaces_from_string(obj):
+    def _filter_brackets_spaces_from_string(obj:str) -> str:
         obj = re.sub("[\s]", "", obj)
         m1 = re.match(r"^[\[](.*)[\]]$", obj)
         m2 = re.match(r"^[\()](.*)[\)]$", obj)
@@ -207,7 +207,7 @@ class STypeLike(metaclass=_STypeLike_Meta):
         return self._stype_like
 
     def __str__(self):
-        return self._stype_like
+        return str(self._stype_like)
 
 
 #
@@ -284,7 +284,6 @@ class STypeLike(metaclass=_STypeLike_Meta):
 # ----------------------
 #
 
-
 class _SType_Meta(type):
     @classmethod
     def __instancecheck__(cls, obj):
@@ -332,7 +331,18 @@ class _SType_Meta(type):
 
 
 class SType(metaclass=_SType_Meta):
-    """Shape format descriptor as type with conversion from less restricted formats."""
+    """Shape format descriptor.
+     
+    Has the functions as:
+
+    - tuple based data type to describe shape restrictions (as more restricted format than STypeLike)
+    - converter from STypeLike shape restriction to tuple based SType
+    - checker for numpy.ndarray shape against the SType shape restriction
+
+    SType(":, 3, ...") == (Colon, 3, ...)
+    SType(":, 2").check_ndarray(np.asarray([[1, 2], [3,4], [5,6]])) == True
+
+    """
 
     def __init__(self, stype_like: STypeLike):
         if not isinstance(stype_like, SType):
@@ -520,14 +530,16 @@ class SType(metaclass=_SType_Meta):
 
 
 class sndarray(np.ndarray):
+
     def __new__(
         cls,
         a: ArrayLike,
-        dtype: np.dtype = None,
+        dtype: np.dtype | None = None,
         order: NPOrder | None = None,
         *,
         stype: STypeLike | None = None,
-        device: str | None = None,
+        auto_shape_check: bool = False,
+        device: Literal['cpu'] | None = None,
         copy: bool | None = None,
         like: ArrayLike | None = None,
     ):
@@ -537,14 +549,18 @@ class sndarray(np.ndarray):
         assert isinstance(stype, STypeLike), ValueError(
             "Argument 'stype' has wrong data type (not a STypeLike)."
         )
+        assert isinstance(auto_shape_check, bool), ValueError(
+            "Argument 'auto_shape_check' has wrong data type (not a boolean)."
+        )
+        obj._auto_shape_check = auto_shape_check
         obj._stype = SType(stype)
         return obj
 
     def __array_finalize__(self, obj):
         if obj is None:
             return None
-        # during setting of stype following
-        self.stype = getattr(obj, "_stype", None)
+        self._stype = getattr(obj, "_stype", None)
+        self._auto_shape_check = getattr(obj, "_auto_shape_check", None)
 
     @property
     def stype(self):
@@ -586,20 +602,29 @@ class sndarray(np.ndarray):
         if callable(attr):
 
             def wrapper_method(*args, **kwargs):
+                if self._auto_shape_check:
+                    current_shape = self.shape
+
                 result = attr(*args, **kwargs)
+
                 if isinstance(result, np.ndarray):
-                    if hasattr(result, "device"):
-                        device = result.device
+                    if hasattr(result, 'device'):
+                        result = sndarray( a=result, dtype=result.dtype, stype=self._stype, 
+                                           auto_shape_check=self._auto_shape_check, 
+                                           device=self.device)
                     else:
-                        device = "cpu"
-                    result = sndarray(
-                        a=result, dtype=result.dtype, stype=self._stype, device=device
-                    )
+                        result = sndarray( a = result, dtype=result.dtype, stype=self._stype, 
+                                        auto_shape_check=self._auto_shape_check)
+                    
+                if self._auto_shape_check \
+                   and hasattr(result, 'shape') \
+                   and current_shape != result.shape:
+                    result._stype.check_ndarray(result.__array__(copy=False))
+
                 return result
 
             return wrapper_method
         return attr
-
 
 #
 # Ending: sndarray (shape typed numpy.ndarray)
