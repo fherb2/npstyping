@@ -1,6 +1,6 @@
 # np<ins>s</ins>typing
 
-#### NumPy **<ins>s</ins>**trict **<ins>s</ins>**hape typing – Module for special Numpy use cases.
+#### NumPy <ins>**s**</ins>trict <ins>**s**</ins>hape typing – Module for special Numpy use cases.
 
 ## Overview, history and current situation regarding this
 
