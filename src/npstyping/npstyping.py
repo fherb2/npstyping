@@ -1,6 +1,9 @@
+"""npstyping – Numpy shape typing."""  # noqa: RUF002
+
 import re
+from collections.abc import Iterator
 from types import EllipsisType
-from typing import Literal
+from typing import Any, Literal
 
 import numpy as np
 from numpy.typing import ArrayLike
@@ -11,16 +14,17 @@ from numpy.typing import ArrayLike
 # ===============================
 #
 
-# TODO: Look if we have to use it (or asserts instead)
+# TODO: Look if we have to use it (or asserts instead)  # noqa: FIX002, TD002, TD003
 DO_TYPECHECK = False
 if __debug__:
     DO_TYPECHECK = True
 
 NPOrder = Literal["C", "F", "A", "K"]
+"""Data type for the 'order' parameter of numpy.asarray()."""
 
 
 class ShapeError(Exception):
-    pass
+    """An automatically strict shape type check by SType was not successfully."""
 
 
 #
@@ -42,9 +46,12 @@ class ShapeError(Exception):
 #
 
 
-class _Colon_Meta(type):
+class _Colon_Meta(type):  # noqa: N801
+    """Meta class for type class 'Colon'."""
+
     @classmethod
-    def __instancecheck__(cls, obj):
+    def __instancecheck__(cls, obj: object) -> bool:
+        """Check if object is class Colon or is string with value ':'."""
         # We check for the content, a single valid sign:
         #       >>   ":"   <<
         if isinstance(obj, cls) or obj == ":":
@@ -91,13 +98,12 @@ class Colon(metaclass=_Colon_Meta):
     from this class or Literal[":"] by using isinstance().
     """
 
-    def __new__(cls):
-        return cls
-
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """Return Colon type (is represented by character ':')."""
         return ":"
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Return string representation of Colon type is ':'."""
         return ":"
 
 
@@ -122,21 +128,29 @@ class Colon(metaclass=_Colon_Meta):
 #
 
 
-class _STypeLike_Meta(type):
-    @staticmethod
-    def _filter_brackets_spaces_from_string(obj: str) -> str:
-        obj = re.sub(r"[\s]", "", obj)
-        m1 = re.match(r"^[\[](.*)[\]]$", obj)
-        m2 = re.match(r"^[\()](.*)[\)]$", obj)
-        m3 = re.match(r"^[\{](.*)[\}]$", obj)
-        for m in [m1, m2, m3]:
-            if m:
-                obj = m.group(1)
-                break
-        return obj
+def _filter_brackets_spaces_from_string(obj: str) -> str:
+    """Remove pairs of brackets in strings.
+
+    Helper function only.
+
+    """
+    obj = re.sub(r"[\s]", "", obj)
+    m1 = re.match(r"^[\[](.*)[\]]$", obj)
+    m2 = re.match(r"^[\()](.*)[\)]$", obj)
+    m3 = re.match(r"^[\{](.*)[\}]$", obj)
+    for m in [m1, m2, m3]:
+        if m:
+            obj = m.group(1)
+            break
+    return obj
+
+
+class _STypeLike_Meta(type):  # noqa: N801
+    """Meta class for type class 'STypeLike'."""
 
     @classmethod
-    def __instancecheck__(cls, obj):
+    def __instancecheck__(cls, obj: object) -> bool:  # noqa: C901
+        """Check if object is class STypeLike or a value what is convertible to SType."""
         try:
             # Is instance of SType (includes None, bool, tuple and SType
             # class, since its tested in _SType_Meta?
@@ -146,14 +160,14 @@ class _STypeLike_Meta(type):
             # is convertible into SType?
             if isinstance(obj, str):
                 # we have a string with or without a list inside; have to convert
-                obj = cls._filter_brackets_spaces_from_string(obj)
+                obj = _filter_brackets_spaces_from_string(obj)
                 if (
                     len(obj) == 0 or len(re.sub("[0-9:.,]", "", obj)) > 0
                 ):  # mask signs which should not be in the string
                     return False
                 obj = obj.split(",")
                 for element in obj:
-                    if element == "" or element == ":" or element == "...":
+                    if element in ("", ":", "..."):
                         continue
                     # now we make it safe to have a really positiv integer and not a floating point value
                     # or negative values
@@ -166,7 +180,7 @@ class _STypeLike_Meta(type):
                 #   - floating point, interpretable as unsigned integer
                 #   - ellipsis
                 #   - Colon
-                if not isinstance(obj, (EllipsisType, Colon)) and (int(obj) < 0):
+                if not isinstance(obj, EllipsisType | Colon) and (int(obj) < 0):
                     return False
             else:
                 # a list or tuple
@@ -177,13 +191,12 @@ class _STypeLike_Meta(type):
                 #   - ellipsis or
                 #   - Colon
                 for element in obj:
-                    if not isinstance(element, (EllipsisType, Colon)) and (
+                    if not isinstance(element, EllipsisType | Colon) and (
                         int(element) < 0
                     ):
                         return False
-                    else:
-                        continue
-        except Exception:
+                    continue
+        except Exception:  # noqa: BLE001
             return False
 
         return True
@@ -196,16 +209,13 @@ class _STypeLike_Meta(type):
 
 
 class STypeLike(metaclass=_STypeLike_Meta):
-    """Class which is SType or can be converted into SType."""
+    """Type class for values which are convertible to SType.
 
-    def __new__(cls):
-        return cls
+    The only function is typechecking of an object via "isinstance".
+    It return True in case the value if og type SType or convertible
+    into SType (by using class SType).
 
-    def __repr__(self):
-        return self._stype_like
-
-    def __str__(self):
-        return str(self._stype_like)
+    """
 
 
 #
@@ -283,9 +293,21 @@ class STypeLike(metaclass=_STypeLike_Meta):
 #
 
 
-class _SType_Meta(type):
+class _SType_Meta(type):  # noqa: N801
+    """Meta class for type class 'SType'."""
+
     @classmethod
-    def __instancecheck__(cls, obj):
+    def __instancecheck__(cls, obj: object) -> bool:
+        """Check if object is of type SType or has the correct signature as tuple.
+
+        The generalised signature is: tuple[int >= 0, Colon, EllipsisType]
+
+        But type can also be a boolean or None for special cases by using in sndarray.
+
+        This signature is the format/type after convertion with _to_stype() what will
+        be used by initializing or setting the value of a SType class instance.
+
+        """
         # We check for the restricted format version of the shape description
         #      >>   (tuple[int >= 0, ColonType, EllipsisType])   <<
         # Thats the format after a _to_stype() call in SType.
@@ -301,8 +323,6 @@ class _SType_Meta(type):
                             continue  # element is non-negativ integer
                     elif isinstance(element, Colon):
                         continue
-                    # elif element == ":":
-                    #     continue    # the last possible
                     elif isinstance(element, EllipsisType):
                         continue  # element ok: Ellipsis
                     else:
@@ -313,13 +333,14 @@ class _SType_Meta(type):
             return False  # no tuple :-(
         return True  # Done: Ok. :-)
 
-    def __call__(cls, *args, **kwargs):  # Don't write pragma @classmethod before!
+    def __call__(
+        cls,
+        *args,
+        **kwargs,
+    ) -> "_SType_Meta":  # Don't write pragma @classmethod before!
         if not args and not kwargs:
             return cls
-        elif args:
-            value = args[0]
-        else:
-            value = kwargs["any_shape_type"]
+        value = args[0] if args else kwargs["stype_like"]
         return super().__call__(value)
 
 
@@ -343,110 +364,111 @@ class SType(metaclass=_SType_Meta):
 
     """
 
-    def __init__(self, stype_like: STypeLike):
+    def __init__(self, stype_like: STypeLike) -> None:
+        """Create a instance of SType with a value what is of type SType or convertible into it."""
         if not isinstance(stype_like, SType):
             self._stype = self._to_stype(stype_like)
         else:
             self._stype = stype_like
 
     @property
-    def stype(self):
+    def stype(self) -> tuple[Colon | int | EllipsisType]:
+        """Get the SType value."""
         return self._stype
 
     @stype.getter
-    def stype(self, stype_like: STypeLike):
-        self._stype = self._to_stype(stype_like)
+    def stype(self, stype_like: STypeLike) -> None:
+        """Set SType with a SType value or a convertible value (STypeLike)."""
+        if isinstance(stype_like, SType):
+            self._stype = stype_like
+        else:
+            self._stype = self._to_stype(stype_like)
 
-    @staticmethod
-    def _to_stype(shape: STypeLike) -> "SType":
-        """Make any object to SType as a more standardised writing of the strictly typed shape."""
+    @classmethod
+    def _to_stype(cls, shape: STypeLike) -> "SType":  # noqa: C901
+        """Make any STypeLike object to a SType signature as a more standardised writing of the strictly typed shape."""
         # Note: Since we change a positive non-integer into signed integer by a loop and indexing
         #       at the end, we create a list at first and convert it to a tuple at last. (Tuple
         #       elements can not be overwritten.)
-        VALUE_ERROR_TXT = "Not a valid shape."
-
-        if isinstance(shape, None | bool):
-            return shape
-        elif isinstance(shape, str):
-            try:
+        try:
+            if isinstance(shape, cls | None | bool):
+                return shape
+            if isinstance(shape, str):
                 # we have a string with or without a list inside; have to convert
-                shape = STypeLike._filter_brackets_spaces_from_string(shape)
+                shape = STypeLike._filter_brackets_spaces_from_string(shape)  # noqa: SLF001, is private for module internal use only
                 if (
                     len(shape) == 0 or len(re.sub("[0-9:.,]", "", shape)) > 0
                 ):  # mask signs which should not be in the string
-                    raise ValueError(VALUE_ERROR_TXT)
+                    raise Exception  # noqa: TRY002, TRY301
                 shape = shape.split(",")
                 new_shape = []
                 for element in shape:
                     if element == "":
                         continue
-                    elif element == ":":
+                    if element == ":":
                         new_shape.append(":")
                         continue
-                    elif element == "...":
+                    if element == "...":
                         new_shape.append(...)
                         continue
                     # now we make it safe to have a really index integer and not a floating point value
                     # or negative values
                     if float(element) != abs(int(element)):
-                        raise ValueError(VALUE_ERROR_TXT)
+                        raise Exception  # noqa: TRY002, TRY301
                     new_shape.append(int(element))
                 shape = new_shape
-            except Exception:
-                raise ValueError(VALUE_ERROR_TXT)
-        # we have no string, so we could have: int | str | list[str|int|EllipsisType] | tuple[str|int|EllipsisType]
-        elif not isinstance(shape, list | tuple):
-            # this should be a single value:
-            #   - unsigned integer
-            #   - floating point, interpretable as unsigned integer
-            #   - ellipsis
-            try:
+            # we have no string, so we could have: int | str | list[str|int|EllipsisType] | tuple[str|int|EllipsisType]
+            elif not isinstance(shape, list | tuple):
+                # this should be a single value:
+                #   - unsigned integer
+                #   - floating point, interpretable as unsigned integer
+                #   - ellipsis
+
                 if isinstance(shape, EllipsisType):
                     shape = [...]
                 elif int(shape) >= 0:
                     shape = [int(shape)]
                 else:
-                    raise ValueError(VALUE_ERROR_TXT)
-            except Exception:
-                ValueError(VALUE_ERROR_TXT)
-        elif isinstance(shape, tuple):
-            try:
+                    raise Exception  # noqa: TRY002, TRY301
+            elif isinstance(shape, tuple):
                 shape = list(shape)
-            except Exception:
-                ValueError(VALUE_ERROR_TXT)
-        # we should have a tuple now; but maybe with wrong content
-        ellipsis_cnt = 0
-        try:
+            # we should have a tuple now; but maybe with wrong content
+            ellipsis_cnt = 0
             for i in range(len(shape)):
                 if isinstance(shape[i], EllipsisType):
                     if (i == 0) or (i == len(shape) - 1):
                         ellipsis_cnt += 1
                         continue
-                    else:
-                        raise ValueError(VALUE_ERROR_TXT)
-                elif shape[i] == ":":
+                    raise Exception  # noqa: TRY002, TRY301
+                if shape[i] == ":":
                     continue
                 # now we make it safe to have a really index integer and not a floating point value
                 # or negative values
-                elif isinstance(shape[i], int):
+                if isinstance(shape[i], int):
                     if shape[i] < 0:
-                        raise ValueError(VALUE_ERROR_TXT)
+                        raise Exception  # noqa: TRY002, TRY301
                     shape[i] = int(shape[i])
                     continue
-                else:
-                    raise ValueError(VALUE_ERROR_TXT)
+                raise Exception  # noqa: TRY002, TRY301
             if ellipsis_cnt > 1:
-                raise ValueError(VALUE_ERROR_TXT)
-        except Exception:
-            raise ValueError(VALUE_ERROR_TXT)
-        return tuple(shape)
+                raise Exception  # noqa: TRY002, TRY301
+            return tuple(shape)
+        except Exception:  # noqa: BLE001
+            msg = "Not a valid shape."
+            raise ValueError(msg)  # noqa: B904
 
     def check_ndarray(self, array: ArrayLike) -> bool:
+        """Check an numpy array(-like) object for the shape.
+
+        The return value is a boolean. No Exception will be raised if
+        the chape is not correct.
+
+        """
         if isinstance(array, np.ndarray):
             a_shape = array.shape
         else:
             a_shape = np.array(array).shape
-        stype = self._stype  # maybe we cut out ellipsis
+        stype = self._stype  # maybe we cut out ellipsis later, so we copy it here
         try:
             # we remove dimensions in case an ellipsis is given at the
             # beginning or the end
@@ -466,12 +488,11 @@ class SType(metaclass=_SType_Meta):
                 if s == ":":
                     # Ok. It can be any size at this dimension.
                     continue
-                elif s == a_s:
+                if s == a_s:
                     # Ok. Same size of this dimension.
                     continue
-                else:
-                    return False
-        except Exception:
+                return False
+        except Exception:  # noqa: BLE001
             # We do not catch all special cases individually that
             # lead to false.
             return False
@@ -479,29 +500,38 @@ class SType(metaclass=_SType_Meta):
         # if we are here, so shape is ok
         return True
 
-    def __repr__(self):
+    def __repr__(self):  # noqa: ANN204
+        """Representation of the value of SType."""
         return repr(self._stype)
 
-    def __eq__(self, other):
-        if isinstance(other, tuple):
-            return self._stype == other
+    def __eq__(self, other: "SType" | STypeLike | bool | None) -> bool:  # noqa: TC010
+        """Check the value against an other valid value."""
         if isinstance(other, SType):
             return self._stype == other._stype
+        if isinstance(other, tuple | bool | None):
+            return self._stype == other
+        if isinstance(other, STypeLike):
+            return self._stype == SType(other)
         return False
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
+        """Implement iter(self)."""
         return iter(self._stype)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> Colon | EllipsisType | int:
+        """Implement getitem(self)."""
         return self._stype[index]
 
-    def __len__(self):
+    def __len__(self) -> int:
+        """Return len(self)."""
         return len(self._stype)
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Return the string representation."""
         return str(self._stype)
 
-    def __contains__(self, item):
+    def __contains__(self, item: Any) -> bool:  # noqa: ANN401
+        """Return key in self."""
         return item in self._stype
 
 
@@ -528,7 +558,9 @@ class SType(metaclass=_SType_Meta):
 #                     against the current array shape
 
 
-class sndarray(np.ndarray):
+class sndarray(np.ndarray):  # noqa: N801, Compatible naming to type numpy.ndarray
+    """Numpy array with shape restiction behavior."""
+
     def __new__(
         cls,
         a: ArrayLike,
@@ -540,32 +572,35 @@ class sndarray(np.ndarray):
         device: Literal["cpu"] | None = None,
         copy: bool | None = None,
         like: ArrayLike | None = None,
-    ):
+    ) -> "sndarray":
+        """Create sndarray class."""
         # Create the numpy array
         obj = np.asarray(a, dtype, order, device=device, copy=copy, like=like).view(cls)
         # Add additional properties
         assert isinstance(stype, STypeLike), ValueError(
-            "Argument 'stype' has wrong data type (not a STypeLike)."
+            "Argument 'stype' has wrong data type (not a STypeLike).",
         )
         assert isinstance(auto_shape_check, bool), ValueError(
-            "Argument 'auto_shape_check' has wrong data type (not a boolean)."
+            "Argument 'auto_shape_check' has wrong data type (not a boolean).",
         )
-        obj._auto_shape_check = auto_shape_check
-        obj._stype = SType(stype)
+        obj.auto_shape_check = auto_shape_check
+        obj.stype = SType(stype)
         return obj
 
-    def __array_finalize__(self, obj):
+    def __array_finalize__(self, obj: object) -> None:
+        """Finalize the array."""
         if obj is None:
-            return None
-        self._stype = getattr(obj, "_stype", None)
-        self._auto_shape_check = getattr(obj, "_auto_shape_check", None)
+            return
+        self._stype = getattr(obj, "stype", None)
+        self._auto_shape_check = getattr(obj, "auto_shape_check", None)
 
     @property
-    def stype(self):
+    def stype(self) -> SType:
+        """Return stype attribute."""
         return self._stype
 
     @stype.setter
-    def stype(self, stype_like: STypeLike | bool | None):
+    def stype(self, stype_like: STypeLike | bool | None) -> None:
         if stype_like is None:
             self._stype = None
             return
@@ -576,14 +611,31 @@ class sndarray(np.ndarray):
             # 'False' has no meaning.
             return
         assert isinstance(stype_like, STypeLike), ValueError(
-            "'stype_like' has wrong data type."
+            "'stype_like' has wrong data type.",
         )
         self._stype = SType(stype_like)
 
     def check_stype(self, stype_like: STypeLike | None = None) -> bool:
+        """Check the array by shape restrictions.
+
+        Returns the result, but doesn't raise a ShapeError exception.
+
+        Parameters
+        ----------
+        stype_like : STypeLike | None, optional
+            Set the 'stype' property before the check. Otherwise uses the
+            value of this property, by default None
+
+        Returns
+        -------
+        bool
+            True, if the arrays shape is positive validated by the shape
+            type property 'stype'. Otherwise false.
+
+        """
         if stype_like is not None:
             assert isinstance(stype_like, STypeLike), ValueError(
-                "Parameter 'stype_like' is not STypeLike."
+                "Parameter 'stype_like' is not STypeLike.",
             )
             self._stype = SType(stype_like)
         return self._stype.check_ndarray(self.__array__(copy=False))
@@ -594,12 +646,14 @@ class sndarray(np.ndarray):
     #
 
     # implement the process into all of numpy operations
-    def __getattribute__(self, name):
+    def __getattribute__(self, name: Any) -> Any:  # noqa: ANN401
+        """Overwrtes the method to add some functionality around the numpy methods."""
         attr = super().__getattribute__(name)
 
         if callable(attr):
 
-            def wrapper_method(*args, **kwargs):
+            def wrapper_method(*args, **kwargs):  # noqa: ANN202
+                """Add some functionality around the numpy methods."""
                 if self._auto_shape_check:
                     current_shape = self.shape
 
@@ -627,7 +681,7 @@ class sndarray(np.ndarray):
                     and hasattr(result, "shape")
                     and current_shape != result.shape
                 ):
-                    result._stype.check_ndarray(result.__array__(copy=False))
+                    result.stype.check_ndarray(result.__array__(copy=False))
 
                 return result
 
