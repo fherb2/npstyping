@@ -5,7 +5,7 @@
     // The name of the container created by VSCode with this configuration:
     "name": "npstyping_vscode_development",
     // The image to create the container:
-    "image": "registry.hzdr.de/fwf/libraries/dockerfiles/devcontainers-python-cuda-imageprocessing/npstyping-dev:rel-1.3.2-day-25.03.05",
+    "image": "docker.io/fherb/npstyping-dev:latest",
 
     // see: https://code.visualstudio.com/remote/advancedcontainers/start-processes
     // -> "When referencing a Dockerfile in devcontainer.json, the default entrypoint
