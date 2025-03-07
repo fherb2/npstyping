@@ -48,10 +48,13 @@ mkdocstrings = {extras = ["python"], version = "^0.27.0"}
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
+[tool.mypy]
+exclude = ["sandbox",]
+
 [tool.ruff]
 target-version = "py311"
 src = ["src/dresdyn_data_backend"]
-exclude = []
+exclude = ["sandbox",]
 
 [tool.ruff.lint]
 extend-select = [
