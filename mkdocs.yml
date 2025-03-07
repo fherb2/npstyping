@@ -1,5 +1,5 @@
-site_name: My Docs
+site_name: npstyping
+site_url: https://fherb2.github.io/npstyping/
 nav:
   - Home: index.md
-  - About: about.md
 theme: readthedocs
