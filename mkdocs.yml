@@ -3,3 +3,7 @@ site_url: https://fherb2.github.io/npstyping/
 nav:
   - Home: index.md
 theme: readthedocs
+plugins:
+  - search
+  - mkdocstrings:
+    default_handler: python

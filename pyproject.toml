@@ -19,7 +19,9 @@ packages = [
     { include = "npstyping", from = "src" },
 ]
 
+
 [tool.poetry.dependencies]
+python = "^3.10"
 numpy = "^2.0"
 
 [tool.poetry.group.dev]
@@ -42,7 +44,8 @@ optional = true
 [tool.poetry.group.docs.dependencies]
 mkdocs = "^1.6.1"
 mkdocs-material = "^9.5.44"
-mkdocstrings = {extras = ["python"], version = "^0.27.0"}
+mkdocstrings = {extras = ["python"], version = "^0.28.2"}
+
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
