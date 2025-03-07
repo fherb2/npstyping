@@ -1,3 +1,3 @@
 # API Documentation
 
-::: npstyping.SType
+::: npstyping.npstyping.SType
