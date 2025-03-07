@@ -1,9 +1,9 @@
 import re
 from types import EllipsisType
 from typing import Literal
+
 import numpy as np
 from numpy.typing import ArrayLike
-
 
 # ############################################################
 #
@@ -41,53 +41,54 @@ class ShapeError(Exception):
 # ----------------------
 #
 
+
 class _Colon_Meta(type):
     @classmethod
     def __instancecheck__(cls, obj):
         # We check for the content, a single valid sign:
         #       >>   ":"   <<
-        if isinstance(obj, cls):
-            return True
-        elif obj == ":":
+        if isinstance(obj, cls) or obj == ":":
             return True
         return False
 
-    # The most simple form of __call__(cls, *args, **kwargs) looks like:
-    #
-    #   if not args and not kwargs:
-    #       return cls
-    #   return super().__call__(*args, **kwargs)
-    #
-    # 1. But we use some checks before we call the kind class with the initializing value.
-    # 2. Since we have not to memorize the value in the kind class and, instead, we
-    #    converts the value in a type of the same kind class, we don't need call the kind
-    #    initialization with the value.
+    # # The most simple form of __call__(cls, *args, **kwargs) looks like:
+    # #
+    # #   if not args and not kwargs:
+    # #       return cls
+    # #   return super().__call__(*args, **kwargs)
+    # #
+    # # 1. But we use some checks before we call the kind class with the initializing value.
+    # # 2. Since we have not to memorize the value in the kind class and, instead, we
+    # #    converts the value in a type of the same kind class, we don't need call the kind
+    # #    initialization with the value.
 
-    def __call__(cls, *args, **kwargs):  # Don't write pragma @classmethod before!
-        if not args and not kwargs:
-            return cls
-        elif args:
-            value = args[0]
-        else:
-            value = kwargs["colon"]
-        if isinstance(value, cls):
-            return value
-        if value == ":":
-            return (
-                super().__call__()
-            )  #  since 2, we must not call super().__call__(value)
-        raise ValueError("Value is not a Colon (type class) or a string of ':'.")
+    # def __call__(cls, *args, **kwargs):  # Don't write pragma @classmethod before!
+    #     if not args and not kwargs:
+    #         return cls
+    #     elif args:
+    #         value = args[0]
+    #     else:
+    #         value = kwargs["colon"]
+    #     if isinstance(value, cls):
+    #         return value
+    #     if value == ":":
+    #         return (
+    #             super().__call__()
+    #         )  #  since 2, we must not call super().__call__(value)
+    #     raise ValueError("Value is not a Colon (type class) or a string of ':'.")
+
 
 #
 # Colon implementation
 # --------------------
 #
 
+
 class Colon(metaclass=_Colon_Meta):
     """Colon using in SType.
-    
+
     Class can be used to check for a colon independing the colon
-    from this class or Literal[":"] by using isinstance(). 
+    from this class or Literal[":"] by using isinstance().
     """
 
     def __new__(cls):
@@ -98,6 +99,7 @@ class Colon(metaclass=_Colon_Meta):
 
     def __str__(self):
         return ":"
+
 
 #
 # Ending: Colon (Type)
@@ -122,8 +124,8 @@ class Colon(metaclass=_Colon_Meta):
 
 class _STypeLike_Meta(type):
     @staticmethod
-    def _filter_brackets_spaces_from_string(obj:str) -> str:
-        obj = re.sub("[\s]", "", obj)
+    def _filter_brackets_spaces_from_string(obj: str) -> str:
+        obj = re.sub(r"[\s]", "", obj)
         m1 = re.match(r"^[\[](.*)[\]]$", obj)
         m2 = re.match(r"^[\()](.*)[\)]$", obj)
         m3 = re.match(r"^[\{](.*)[\}]$", obj)
@@ -151,11 +153,7 @@ class _STypeLike_Meta(type):
                     return False
                 obj = obj.split(",")
                 for element in obj:
-                    if element == "":
-                        continue
-                    elif element == ":":
-                        continue
-                    elif element == "...":
+                    if element == "" or element == ":" or element == "...":
                         continue
                     # now we make it safe to have a really positiv integer and not a floating point value
                     # or negative values
@@ -284,6 +282,7 @@ class STypeLike(metaclass=_STypeLike_Meta):
 # ----------------------
 #
 
+
 class _SType_Meta(type):
     @classmethod
     def __instancecheck__(cls, obj):
@@ -332,7 +331,7 @@ class _SType_Meta(type):
 
 class SType(metaclass=_SType_Meta):
     """Shape format descriptor.
-     
+
     Has the functions as:
 
     - tuple based data type to describe shape restrictions (as more restricted format than STypeLike)
@@ -530,7 +529,6 @@ class SType(metaclass=_SType_Meta):
 
 
 class sndarray(np.ndarray):
-
     def __new__(
         cls,
         a: ArrayLike,
@@ -539,7 +537,7 @@ class sndarray(np.ndarray):
         *,
         stype: STypeLike | None = None,
         auto_shape_check: bool = False,
-        device: Literal['cpu'] | None = None,
+        device: Literal["cpu"] | None = None,
         copy: bool | None = None,
         like: ArrayLike | None = None,
     ):
@@ -608,23 +606,34 @@ class sndarray(np.ndarray):
                 result = attr(*args, **kwargs)
 
                 if isinstance(result, np.ndarray):
-                    if hasattr(result, 'device'):
-                        result = sndarray( a=result, dtype=result.dtype, stype=self._stype, 
-                                           auto_shape_check=self._auto_shape_check, 
-                                           device=self.device)
+                    if hasattr(result, "device"):
+                        result = sndarray(
+                            a=result,
+                            dtype=result.dtype,
+                            stype=self._stype,
+                            auto_shape_check=self._auto_shape_check,
+                            device=self.device,
+                        )
                     else:
-                        result = sndarray( a = result, dtype=result.dtype, stype=self._stype, 
-                                        auto_shape_check=self._auto_shape_check)
-                    
-                if self._auto_shape_check \
-                   and hasattr(result, 'shape') \
-                   and current_shape != result.shape:
+                        result = sndarray(
+                            a=result,
+                            dtype=result.dtype,
+                            stype=self._stype,
+                            auto_shape_check=self._auto_shape_check,
+                        )
+
+                if (
+                    self._auto_shape_check
+                    and hasattr(result, "shape")
+                    and current_shape != result.shape
+                ):
                     result._stype.check_ndarray(result.__array__(copy=False))
 
                 return result
 
             return wrapper_method
         return attr
+
 
 #
 # Ending: sndarray (shape typed numpy.ndarray)
