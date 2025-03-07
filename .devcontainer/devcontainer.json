@@ -155,6 +155,11 @@
             // "streetsidesoftware.code-spell-checker", // Code Spell Checker – see: https://marketplace.visualstudio.com/items?itemName=streetsidesoftware.code-spell-checker
             // "streetsidesoftware.code-spell-checker-german", // adds German language to streetsidesoftware.code-spell-checker
 
+            // TOML
+            // ====
+
+            "tamasfe.even-better-toml",     // "Even Better TOML" – "Fully-featured TOML support" see: https://marketplace.visualstudio.com/items?itemName=tamasfe.even-better-toml
+
             // Python relating
             // ===============
             "ms-python.python", // Python extension for Visual Studio Code, see: https://marketplace.visualstudio.com/items?itemName=ms-python.python
@@ -193,9 +198,9 @@
             // "wholroyd.jinja",   // Jinja extension – see: https://marketplace.visualstudio.com/items?itemName=wholroyd.jinja
                                 //                   Jinjy usage: https://realpython.com/primer-on-jinja-templating/
 
-            "charliermarsh.ruff",   // Ruff extension – see: https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff
+            // "charliermarsh.ruff",   // Ruff extension – see: https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff
 
-            "ms-python.mypy-type-checker",  // Mypy Type Checker – Microsoft, see: https://marketplace.visualstudio.com/items?itemName=ms-python.mypy-type-checker
+            // "ms-python.mypy-type-checker",  // Mypy Type Checker – Microsoft, see: https://marketplace.visualstudio.com/items?itemName=ms-python.mypy-type-checker
 
             // Jupyter Extension
             // =================
