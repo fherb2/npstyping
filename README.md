@@ -1,6 +1,6 @@
 # npstyping
 
-NumPy s_hape / s_trict typing – Module for special Numpy use cases.
+NumPy **s**hape / **s**trict typing – Module for special Numpy use cases.
 
 ## Overview, history and current situation regarding this
 
