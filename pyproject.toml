@@ -1,0 +1,100 @@
+[tool.poetry]
+name = "npstyping"
+version = "0.0.1"
+description = "Shape restrict numpy arrays"
+authors = [
+    "fherb2 <herbrand@gmx.de>",
+]
+maintainers = [
+    "fherb2 <herbrand@gmx.de>",
+]
+
+readme = "README.md"
+repository = "https://github.com/fherb2/npstyping"
+# documentation = ""
+license = "MIT"
+keywords = ["numpy", "typing", "shape"]
+
+packages = [
+    { include = "npstyping", from = "src" },
+]
+
+[tool.poetry.dependencies]
+numpy = "^2.0"
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+pre-commit = "^4.0.1"
+pytest-cov = "^6.0.0"
+mypy = "^1.15.0"
+feedparser = "^6.0.11"
+beartype = "^0.19.0"
+pyright = "^1.1.396"
+typeguard = "^4.4.1"
+# tox = "^4.24.1"
+
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = "^1.6.1"
+mkdocs-material = "^9.5.44"
+mkdocstrings = {extras = ["python"], version = "^0.27.0"}
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+exclude = ["sandbox",]
+
+[tool.ruff]
+target-version = "py310"
+# line-length = 120 , see ignore E501
+src = ["src/npstyping"]
+exclude = ["sandbox",]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = ["ALL"]
+extend-select = [
+    "PGH",  # pygrep
+    "E",    # error
+    "W",    # warning
+    "F",    # pyflakes
+    "B",    # flake8-bugbear
+    "Q",    # flake8-quotes
+    "PL",   # flake8-pytest-style
+    "I001", # unsorted-imports
+#    "SLF",  # flake8-self
+    "SIM",  # flake8-simplify
+    "TID",  # flake8-tidy-imports
+    "ASYNC",# flake8-async
+    "ARG",  # flake8-unused-arguments
+    "LOG",  # flake8-logging
+    "PT",   # flake8-pytest-style
+    "N",    # pep8-naming
+    "RUF",  # ruff checks
+    "D",    # pydocstyle
+]
+ignore = [
+    "ANN002",
+    "ANN003",
+    "E501",     # line-too-long
+    "ERA001",   # comment out code
+    "RUF003",
+    "S101",
+    "SIM102",   # collapsible-if
+    "SIM103",
+    "PLR0912",  # too-many-branches
+    "PLR0913",  # too-many-arguments
+    "PLR0915",  # too-many-statements
+    "PLR0911",  # too-many-return-statements
+    "D203",     # one-blank-line-before-class
+    "D213",     # multi-line-summary-second-line
+]
