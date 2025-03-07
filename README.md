@@ -37,7 +37,7 @@ If you are already using **datetime64 and timedelta64, you may have encountered 
 
 # np<ins>s</ins>typing – strictly shaped typing for NumPy arrays
 
-In summary, this module has the following two aims:
+In summary, this module has the following aims:
 
 * Primary: Observe / check the shape of arrays during processing.
 * Secondary 1: Extend dtype checks to ndarray-dtype 'object' cases (dtype = 'O')
