@@ -52,3 +52,12 @@ This means that the main goal is in an first usable state for intensive testing 
 # Development hints
 
 The development happens by using VSCode and a development container with the right Python version in order to avoid side effects with the situation of the development system. The configuration and the used images is configured in ./.devcontainer/devcontainer.json .
+
+## Actual development step for next version
+
+- implementing a first version similar to nptyping
+
+## Future plans
+
+- Implementing the secondary aims
+- Instead of just ‘:’ for any size of a dimension or an integer value as the exact size of a dimension, the size range of a dimension should be expanded to enumeration or range.
