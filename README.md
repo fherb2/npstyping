@@ -60,4 +60,4 @@ The development happens by using VSCode and a development container with the rig
 ## Future plans
 
 - Implementing the secondary aims
-- Instead of just ‘:’ for any size of a dimension or an integer value as the exact size of a dimension, the size range of a dimension should be expanded to enumeration or range.
+- Instead of just ':' for any size of a dimension or an integer value as the exact size of a dimension, the size range of a dimension should be expanded to enumeration or range.

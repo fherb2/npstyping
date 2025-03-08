@@ -53,13 +53,13 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.mypy]
-exclude = ["sandbox",]
+exclude = ["sandbox"]
 
 [tool.ruff]
 target-version = "py310"
 # line-length = 120 , see ignore E501
 src = ["src/npstyping"]
-exclude = ["sandbox",]
+exclude = ["sandbox", "tests"]
 
 [tool.ruff.format]
 docstring-code-format = true

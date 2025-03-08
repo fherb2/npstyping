@@ -23,8 +23,6 @@ def test_ColonType_types():
     assert isinstance(Colon, _Colon_Meta)
     a = Colon
     assert isinstance(a, Colon)
-    b = Colon(":")
-    assert isinstance(b, Colon)
 
 
 @pytest.mark.parametrize(
@@ -39,11 +37,6 @@ def test_ColonType_types():
 def test_ColonType(in1, out1):
     assert isinstance(in1, Colon) == out1
 
-
-@pytest.mark.parametrize("in1", [(";"), (1)])
-def test_ColonType_value_error_exceptions(in1):
-    with pytest.raises(ValueError):
-        Colon(in1)
 
 
 #

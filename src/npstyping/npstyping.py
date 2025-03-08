@@ -212,7 +212,7 @@ class STypeLike(metaclass=_STypeLike_Meta):
     """Type class for values which are convertible to SType.
 
     The only function is typechecking of an object via "isinstance".
-    It return True in case the value if og type SType or convertible
+    It returns True in case the value is of type SType or convertible
     into SType (by using class SType).
 
     """
@@ -315,7 +315,7 @@ class _SType_Meta(type):  # noqa: N801
         if isinstance(obj, cls | None | bool):
             # Special cases. It's ok.
             return True
-        if isinstance(obj, tuple):
+        if isinstance(obj, SType):
             if len(obj) > 0:  # tuple has elements
                 for element in obj:
                     if isinstance(element, int):
@@ -504,7 +504,7 @@ class SType(metaclass=_SType_Meta):
         """Representation of the value of SType."""
         return repr(self._stype)
 
-    def __eq__(self, other: "SType" | STypeLike | bool | None) -> bool:  # noqa: TC010
+    def __eq__(self, other: STypeLike | bool | None) -> bool:
         """Check the value against an other valid value."""
         if isinstance(other, SType):
             return self._stype == other._stype
