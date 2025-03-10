@@ -3,14 +3,25 @@ site_url: https://fherb2.github.io/npstyping/
 nav:
   - Home: index.md
   - API:  api.md
-theme: readthedocs
+theme: mkdocs
 plugins:
   - search
   - mkdocstrings:
       handlers:
         python:
           options:
-            paths: ["src"]
             docstring_style: numpy
+            summary: true
+            show_source: false
+            parameter_headings: true
+          #  show_labels: true
+            members_order: alphabetical
+            show_bases: false
+            group_by_category: true
+            show_category_heading: true
             members: true
-            filters: ["!^_"] # ignores privat methods
+            filters:
+              - "!^_"
+              - "!^__"
+            extra:
+              paths: ["src"]

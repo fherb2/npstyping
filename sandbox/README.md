@@ -1,3 +1,3 @@
 # For tests 'by hand' only.
 
-Mypy and Linter deactivated.
+Mypy and Linter deactivated here.

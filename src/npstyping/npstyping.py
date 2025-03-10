@@ -360,6 +360,7 @@ class SType(metaclass=_SType_Meta):
     - checker for numpy.ndarray shape against the SType shape restriction
 
     SType(":, 3, ...") == (Colon, 3, ...)
+
     SType(":, 2").check_ndarray(np.asarray([[1, 2], [3,4], [5,6]])) == True
 
     """
