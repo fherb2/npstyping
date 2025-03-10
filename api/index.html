@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://fherb2.github.io/npstyping/api/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>API - npstyping</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "API";
+        var mkdocs_page_input_path = "api.md";
+        var mkdocs_page_url = "/npstyping/api/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> npstyping
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">API</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#npstyping.npstyping">npstyping</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#npstyping.npstyping.ShapeError">ShapeError</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#npstyping.npstyping.Colon">Colon</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#npstyping.npstyping.Colon.__repr__">__repr__</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#npstyping.npstyping.Colon.__str__">__str__</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#npstyping.npstyping.STypeLike">STypeLike</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#npstyping.npstyping.SType">SType</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#npstyping.npstyping.SType.__init__">__init__</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#npstyping.npstyping.SType.stype">stype</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#npstyping.npstyping.SType._to_stype">_to_stype</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#npstyping.npstyping.SType.check_ndarray">check_ndarray</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#npstyping.npstyping.SType.__repr__">__repr__</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#npstyping.npstyping.SType.__eq__">__eq__</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#npstyping.npstyping.SType.__iter__">__iter__</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#npstyping.npstyping.SType.__getitem__">__getitem__</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#npstyping.npstyping.SType.__len__">__len__</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#npstyping.npstyping.SType.__str__">__str__</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#npstyping.npstyping.SType.__contains__">__contains__</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#npstyping.npstyping.sndarray">sndarray</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#npstyping.npstyping.sndarray.stype">stype</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#npstyping.npstyping.sndarray.__new__">__new__</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#npstyping.npstyping.sndarray.check_stype">check_stype</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#npstyping.npstyping.sndarray.__getattribute__">__getattribute__</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">npstyping</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">API</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="api-documentation">API Documentation</h1>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="npstyping.npstyping"></a>
+    <div class="doc doc-contents first">
+
+        <p>npstyping – Numpy shape typing.</p>
+
+
+
+
+
+
+
+<p><span class="doc-section-title">Classes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="npstyping.npstyping.ShapeError" href="#npstyping.npstyping.ShapeError">ShapeError</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>An automatically strict shape type check by SType was not successfully.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="npstyping.npstyping.Colon" href="#npstyping.npstyping.Colon">Colon</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Colon using in SType.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="npstyping.npstyping.STypeLike" href="#npstyping.npstyping.STypeLike">STypeLike</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Type class for values which are convertible to SType.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="npstyping.npstyping.SType" href="#npstyping.npstyping.SType">SType</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Shape format descriptor.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="npstyping.npstyping.sndarray" href="#npstyping.npstyping.sndarray">sndarray</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Numpy array with shape restiction behavior.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="npstyping.npstyping.ShapeError" class="doc doc-heading">
+            <code>ShapeError</code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+
+        <p>An automatically strict shape type check by SType was not successfully.</p>
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="npstyping.npstyping.Colon" class="doc doc-heading">
+            <code>Colon</code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+
+        <p>Colon using in SType.</p>
+<p>Class can be used to check for a colon independing the colon
+from this class or Literal[":"] by using isinstance().</p>
+
+
+
+
+
+
+
+
+
+<p><span class="doc-section-title">Methods:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="npstyping.npstyping.Colon.__repr__" href="#npstyping.npstyping.Colon.__repr__">__repr__</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Return Colon type (is represented by character ':').</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="npstyping.npstyping.Colon.__str__" href="#npstyping.npstyping.Colon.__str__">__str__</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Return string representation of Colon type is ':'.</p>
+                </div>
+              </td>
+            </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="npstyping.npstyping.Colon.__repr__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__repr__</span><span class="p">()</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return Colon type (is represented by character ':').</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="npstyping.npstyping.Colon.__str__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__str__</span><span class="p">()</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return string representation of Colon type is ':'.</p>
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="npstyping.npstyping.STypeLike" class="doc doc-heading">
+            <code>STypeLike</code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+
+        <p>Type class for values which are convertible to SType.</p>
+<p>The only function is typechecking of an object via "isinstance".
+It returns True in case the value is of type SType or convertible
+into SType (by using class SType).</p>
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="npstyping.npstyping.SType" class="doc doc-heading">
+            <code>SType</code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+
+        <p>Shape format descriptor.</p>
+<p>Has the functions as:</p>
+<ul>
+<li>tuple based data type to describe shape restrictions (as more restricted format than STypeLike)</li>
+<li>converter from STypeLike shape restriction to tuple based SType</li>
+<li>checker for numpy.ndarray shape against the SType shape restriction</li>
+</ul>
+<p>SType(":, 3, ...") == (Colon, 3, ...)</p>
+<p>SType(":, 2").check_ndarray(np.asarray([[1, 2], [3,4], [5,6]])) == True</p>
+
+
+
+
+
+
+
+
+
+<p><span class="doc-section-title">Methods:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="npstyping.npstyping.SType.__init__" href="#npstyping.npstyping.SType.__init__">__init__</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Create a instance of SType with a value what is of type SType or convertible into it.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="npstyping.npstyping.SType.stype" href="#npstyping.npstyping.SType.stype">stype</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Set SType with a SType value or a convertible value (STypeLike).</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="npstyping.npstyping.SType.check_ndarray" href="#npstyping.npstyping.SType.check_ndarray">check_ndarray</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Check an numpy array(-like) object for the shape.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="npstyping.npstyping.SType.__repr__" href="#npstyping.npstyping.SType.__repr__">__repr__</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Representation of the value of SType.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="npstyping.npstyping.SType.__eq__" href="#npstyping.npstyping.SType.__eq__">__eq__</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Check the value against an other valid value.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="npstyping.npstyping.SType.__iter__" href="#npstyping.npstyping.SType.__iter__">__iter__</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Implement iter(self).</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="npstyping.npstyping.SType.__getitem__" href="#npstyping.npstyping.SType.__getitem__">__getitem__</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Implement getitem(self).</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="npstyping.npstyping.SType.__len__" href="#npstyping.npstyping.SType.__len__">__len__</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Return len(self).</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="npstyping.npstyping.SType.__str__" href="#npstyping.npstyping.SType.__str__">__str__</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Return the string representation.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="npstyping.npstyping.SType.__contains__" href="#npstyping.npstyping.SType.__contains__">__contains__</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Return key in self.</p>
+                </div>
+              </td>
+            </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="npstyping.npstyping.SType.__init__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">stype_like</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Create a instance of SType with a value what is of type SType or convertible into it.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="npstyping.npstyping.SType.stype" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">stype</span><span class="p">(</span><span class="n">stype_like</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Set SType with a SType value or a convertible value (STypeLike).</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="npstyping.npstyping.SType._to_stype" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">_to_stype</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Make any STypeLike object to a SType signature as a more standardised writing of the strictly typed shape.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="npstyping.npstyping.SType.check_ndarray" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">check_ndarray</span><span class="p">(</span><span class="n">array</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Check an numpy array(-like) object for the shape.</p>
+<p>The return value is a boolean. No Exception will be raised if
+the chape is not correct.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="npstyping.npstyping.SType.__repr__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__repr__</span><span class="p">()</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Representation of the value of SType.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="npstyping.npstyping.SType.__eq__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Check the value against an other valid value.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="npstyping.npstyping.SType.__iter__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__iter__</span><span class="p">()</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Implement iter(self).</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="npstyping.npstyping.SType.__getitem__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__getitem__</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Implement getitem(self).</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="npstyping.npstyping.SType.__len__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__len__</span><span class="p">()</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return len(self).</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="npstyping.npstyping.SType.__str__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__str__</span><span class="p">()</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the string representation.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="npstyping.npstyping.SType.__contains__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__contains__</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return key in self.</p>
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="npstyping.npstyping.sndarray" class="doc doc-heading">
+            <code>sndarray</code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+
+        <p>Numpy array with shape restiction behavior.</p>
+
+
+
+
+
+
+
+
+
+<p><span class="doc-section-title">Methods:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="npstyping.npstyping.sndarray.__new__" href="#npstyping.npstyping.sndarray.__new__">__new__</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Create sndarray class.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="npstyping.npstyping.sndarray.check_stype" href="#npstyping.npstyping.sndarray.check_stype">check_stype</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Check the array by shape restrictions.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="npstyping.npstyping.sndarray.__getattribute__" href="#npstyping.npstyping.sndarray.__getattribute__">__getattribute__</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Overwrtes the method to add some functionality around the numpy methods.</p>
+                </div>
+              </td>
+            </tr>
+      </tbody>
+    </table>
+
+
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Attributes:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>stype</code></b>
+                  (<code><a class="autorefs autorefs-internal" title="npstyping.npstyping.SType" href="#npstyping.npstyping.SType">SType</a></code>)
+              –
+              <div class="doc-md-description">
+                <p>Return stype attribute.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="npstyping.npstyping.sndarray.stype" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">stype</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return stype attribute.</p>
+    </div>
+
+</div>
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="npstyping.npstyping.sndarray.__new__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__new__</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">stype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">auto_shape_check</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">like</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Create sndarray class.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="npstyping.npstyping.sndarray.check_stype" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">check_stype</span><span class="p">(</span><span class="n">stype_like</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Check the array by shape restrictions.</p>
+<p>Returns the result, but doesn't raise a ShapeError exception.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>stype_like</code></b>
+                  (<code><a class="autorefs autorefs-internal" title="npstyping.npstyping.STypeLike" href="#npstyping.npstyping.STypeLike">STypeLike</a> | None</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Set the 'stype' property before the check. Otherwise uses the
+value of this property, by default None</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><span title="bool">bool</span></code>
+              –
+              <div class="doc-md-description">
+                <p>True, if the arrays shape is positive validated by the shape
+type property 'stype'. Otherwise false.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="npstyping.npstyping.sndarray.__getattribute__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Overwrtes the method to add some functionality around the numpy methods.</p>
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href=".." class="btn btn-neutral float-left" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
