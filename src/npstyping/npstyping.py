@@ -14,10 +14,34 @@ from numpy.typing import ArrayLike
 # ===============================
 #
 
-# TODO: Look if we have to use it (or asserts instead)  # noqa: FIX002, TD002, TD003
-DO_TYPECHECK = False
-if __debug__:
-    DO_TYPECHECK = True
+DO_TYPECHECK = __debug__
+"""If False: Switches off type- and instance-checks.
+
+    'DO_TYPECHECK' is set to 'True' automatically, if Python is not started in
+    optimizes mode (option '-O'): DO_TYPECHECK is a simple copy of __debug__.
+
+    With 'DO_TYPECHECK' == 'False' in optimized mode, the 'isinstance'-typechecking of
+    classes
+
+      - Colon,
+      - STypeLike and
+      - Stype
+
+    are disabled to safe processing time (simmilar to the removed asserts in this mode).
+
+    If you want to use isinstance-checks also for these classes in this mode, so set
+
+        'npstyping.DO_TYPECHECK = True'
+
+    explicitly after importing the modul.
+
+    Class sndarray:
+
+    The type checks of the ndarray subclass of sndarray are unaffected from this behavior.
+    Only the stype-Parameter keeps unchecked if you set it. Are wrong values used during
+    this mode where type checking is switched of, so exceptions can happen.
+
+"""
 
 NPOrder = Literal["C", "F", "A", "K"]
 """Data type for the 'order' parameter of numpy.asarray()."""
@@ -49,12 +73,16 @@ class ShapeError(Exception):
 class _Colon_Meta(type):  # noqa: N801
     """Meta class for type class 'Colon'."""
 
-    @classmethod
+    # Do not write '@classmethod' here!
     def __instancecheck__(cls, obj: object) -> bool:
         """Check if object is class Colon or is string with value ':'."""
         # We check for the content, a single valid sign:
         #       >>   ":"   <<
-        if isinstance(obj, cls) or obj == ":":
+        if not DO_TYPECHECK:
+            return True
+        if type(obj) is Colon:
+            return True
+        if isinstance(obj, str) and obj == ":":
             return True
         return False
 
@@ -100,7 +128,7 @@ class Colon(metaclass=_Colon_Meta):
 
     def __repr__(self) -> str:
         """Return Colon type (is represented by character ':')."""
-        return ":"
+        return "The Colon (as type or as string ':') is used to specify a dimension size as any value. But the dimension must be present."
 
     def __str__(self) -> str:
         """Return string representation of Colon type is ':'."""
@@ -148,13 +176,15 @@ def _filter_brackets_spaces_from_string(obj: str) -> str:
 class _STypeLike_Meta(type):  # noqa: N801
     """Meta class for type class 'STypeLike'."""
 
-    @classmethod
+    # Do not write '@classmethod' here!
     def __instancecheck__(cls, obj: object) -> bool:  # noqa: C901
         """Check if object is class STypeLike or a value what is convertible to SType."""
+        if not DO_TYPECHECK:
+            return True
         try:
             # Is instance of SType (includes None, bool, tuple and SType
             # class, since its tested in _SType_Meta?
-            if isinstance(obj, SType | cls):
+            if type(obj) is STypeLike:
                 return True
 
             # is convertible into SType?
@@ -296,8 +326,8 @@ class STypeLike(metaclass=_STypeLike_Meta):
 class _SType_Meta(type):  # noqa: N801
     """Meta class for type class 'SType'."""
 
-    @classmethod
-    def __instancecheck__(cls, obj: object) -> bool:
+    # Do not write '@classmethod' here!
+    def __instancecheck__(cls, obj: object) -> bool:  # noqa: C901
         """Check if object is of type SType or has the correct signature as tuple.
 
         The generalised signature is: tuple[int >= 0, Colon, EllipsisType]
@@ -312,10 +342,14 @@ class _SType_Meta(type):  # noqa: N801
         #      >>   (tuple[int >= 0, ColonType, EllipsisType])   <<
         # Thats the format after a _to_stype() call in SType.
         #
-        if isinstance(obj, cls | None | bool):
+        if not DO_TYPECHECK:
+            return True
+        if type(obj) is SType:
+            return True
+        if isinstance(obj, None | bool):
             # Special cases. It's ok.
             return True
-        if isinstance(obj, SType):
+        if isinstance(obj, tuple):
             if len(obj) > 0:  # tuple has elements
                 for element in obj:
                     if isinstance(element, int):
@@ -337,7 +371,7 @@ class _SType_Meta(type):  # noqa: N801
         cls,
         *args,
         **kwargs,
-    ) -> "_SType_Meta":  # Don't write pragma @classmethod before!
+    ) -> "_SType_Meta":  # Don't write pragma @classmethod before this method!
         if not args and not kwargs:
             return cls
         value = args[0] if args else kwargs["stype_like"]
@@ -396,7 +430,7 @@ class SType(metaclass=_SType_Meta):
                 return shape
             if isinstance(shape, str):
                 # we have a string with or without a list inside; have to convert
-                shape = STypeLike._filter_brackets_spaces_from_string(shape)  # noqa: SLF001, is private for module internal use only
+                shape = _filter_brackets_spaces_from_string(shape)
                 if (
                     len(shape) == 0 or len(re.sub("[0-9:.,]", "", shape)) > 0
                 ):  # mask signs which should not be in the string
@@ -501,16 +535,12 @@ class SType(metaclass=_SType_Meta):
         # if we are here, so shape is ok
         return True
 
-    def __repr__(self):  # noqa: ANN204
-        """Representation of the value of SType."""
-        return repr(self._stype)
-
     def __eq__(self, other: STypeLike | bool | None) -> bool:
         """Check the value against an other valid value."""
-        if isinstance(other, SType):
-            return self._stype == other._stype
         if isinstance(other, tuple | bool | None):
             return self._stype == other
+        if isinstance(other, SType):
+            return self._stype == other._stype
         if isinstance(other, STypeLike):
             return self._stype == SType(other)
         return False
@@ -562,6 +592,7 @@ class SType(metaclass=_SType_Meta):
 class sndarray(np.ndarray):  # noqa: N801, Compatible naming to type numpy.ndarray
     """Numpy array with shape restiction behavior."""
 
+    # implementation see: https://numpy.org/doc/2.1/user/basics.subclassing.html
     def __new__(
         cls,
         a: ArrayLike,
@@ -575,15 +606,16 @@ class sndarray(np.ndarray):  # noqa: N801, Compatible naming to type numpy.ndarr
         like: ArrayLike | None = None,
     ) -> "sndarray":
         """Create sndarray class."""
-        # Create the numpy array
-        obj = np.asarray(a, dtype, order, device=device, copy=copy, like=like).view(cls)
-        # Add additional properties
+        # Check inputs
         assert isinstance(stype, STypeLike), ValueError(
             "Argument 'stype' has wrong data type (not a STypeLike).",
         )
         assert isinstance(auto_shape_check, bool), ValueError(
             "Argument 'auto_shape_check' has wrong data type (not a boolean).",
         )
+        # Create the numpy array
+        obj = np.asarray(a, dtype, order, device=device, copy=copy, like=like).view(cls)
+        # Add additional properties
         obj.auto_shape_check = auto_shape_check
         obj.stype = SType(stype)
         return obj
@@ -592,8 +624,8 @@ class sndarray(np.ndarray):  # noqa: N801, Compatible naming to type numpy.ndarr
         """Finalize the array."""
         if obj is None:
             return
-        self._stype = getattr(obj, "stype", None)
-        self._auto_shape_check = getattr(obj, "auto_shape_check", None)
+        self.stype = getattr(obj, "stype", None)
+        self.auto_shape_check = getattr(obj, "auto_shape_check", None)
 
     @property
     def stype(self) -> SType:

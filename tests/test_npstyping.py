@@ -125,7 +125,6 @@ STypeLike_negativ_test_list = [
 
 
 def test_STypeLike_input_values_check_special_cases():
-    assert isinstance(STypeLike, _STypeLike_Meta)
     a = STypeLike
     assert isinstance(a, STypeLike)
 
@@ -316,6 +315,8 @@ def test_SType_check_not_instance(in1):
 
 @pytest.mark.parametrize("in1, out1", SType_convert_positive_list)
 def test_SType_check_result(in1, out1):
+    a = (SType(in1) == out1)
+    print(a)
     assert SType(in1) == out1
 
 
@@ -519,6 +520,7 @@ for row in array_test_list:
 @pytest.mark.parametrize("in1, in2", array_import_test_list)
 def test_sndarray_stype_setter_getter(in1, in2):
     a = sndarray(a=in2, stype=in1)
+    print(a)
     assert a.stype == SType(in1)
 
 

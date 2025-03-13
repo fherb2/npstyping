@@ -1,11 +1,12 @@
 # API Documentation
 
 ::: npstyping.npstyping
-
-::: npstyping.npstyping.STypeLike
-
-::: npstyping.npstyping.SType
-
-::: npstyping.npstyping.Colon
-
-::: npstyping.npstyping.sndarray
+    options:
+      filters:
+        - "!^__array_finalize"
+      members:
+        - ShapeError
+        - Colon
+        - STypeLike
+        - SType
+        - sndarray
