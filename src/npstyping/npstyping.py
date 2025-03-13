@@ -606,13 +606,6 @@ class sndarray(np.ndarray):  # noqa: N801, Compatible naming to type numpy.ndarr
         like: ArrayLike | None = None,
     ) -> "sndarray":
         """Create sndarray class."""
-        # Check inputs
-        assert isinstance(stype, STypeLike), ValueError(
-            "Argument 'stype' has wrong data type (not a STypeLike).",
-        )
-        assert isinstance(auto_shape_check, bool), ValueError(
-            "Argument 'auto_shape_check' has wrong data type (not a boolean).",
-        )
         # Create the numpy array
         obj = np.asarray(a, dtype, order, device=device, copy=copy, like=like).view(cls)
         # Add additional properties
