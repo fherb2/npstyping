@@ -9,6 +9,10 @@ from npstyping.npstyping import (
 )
 import numpy as np
 
+
+a = Colon
+print(f"{type(a)=}")
+
 arr = np.arange(5)
 obj = sndarray(arr, stype=(":"), auto_shape_check = False)
 print(type(obj))

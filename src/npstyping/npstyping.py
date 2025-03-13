@@ -80,7 +80,7 @@ class _Colon_Meta(type):  # noqa: N801
         #       >>   ":"   <<
         if not DO_TYPECHECK:
             return True
-        if type(obj) is Colon:
+        if obj is cls:
             return True
         if isinstance(obj, str) and obj == ":":
             return True
@@ -184,7 +184,7 @@ class _STypeLike_Meta(type):  # noqa: N801
         try:
             # Is instance of SType (includes None, bool, tuple and SType
             # class, since its tested in _SType_Meta?
-            if type(obj) is STypeLike:
+            if isinstance(obj, SType | None | bool):
                 return True
 
             # is convertible into SType?
@@ -344,7 +344,7 @@ class _SType_Meta(type):  # noqa: N801
         #
         if not DO_TYPECHECK:
             return True
-        if type(obj) is SType:
+        if obj is cls:
             return True
         if isinstance(obj, None | bool):
             # Special cases. It's ok.
@@ -617,7 +617,7 @@ class sndarray(np.ndarray):  # noqa: N801, Compatible naming to type numpy.ndarr
         obj = np.asarray(a, dtype, order, device=device, copy=copy, like=like).view(cls)
         # Add additional properties
         obj.auto_shape_check = auto_shape_check
-        obj.stype = SType(stype)
+        obj.stype = stype
         return obj
 
     def __array_finalize__(self, obj: object) -> None:

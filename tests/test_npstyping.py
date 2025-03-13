@@ -20,9 +20,10 @@ from npstyping.npstyping import (
 
 
 def test_ColonType_types():
-    assert isinstance(Colon, _Colon_Meta)
     a = Colon
+    b = ":"
     assert isinstance(a, Colon)
+    assert isinstance(b, Colon)
 
 
 @pytest.mark.parametrize(
