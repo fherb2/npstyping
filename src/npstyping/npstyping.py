@@ -1,7 +1,6 @@
 """npstyping – Numpy shape typing."""  # noqa: RUF002
 
 import re
-from collections.abc import Iterator
 from types import EllipsisType
 from typing import Any, Literal
 
@@ -291,132 +290,33 @@ class STypeLike(metaclass=_STypeLike_Meta):
 # Methods
 # -------
 #
-#   -   SType   – (defined as: __new__() ); get a SType class
+#   -   SType type class
 #
-#   -   SType(value: STypeLike) (defines as __init__() );  returns a SType class instance
+#   -   SType(value: STypeLike) (defines as __new__() );  returns a SType class instance
 #                 with initialized value 'stype'
 #
 #   -   check_ndarray() – check a NumPy (like) array against the shape type 'stype'
 #
-# Since value 'stype' is a tuple, we handle it as a tuple also:
-#   -   __iter__()
-#   -   __getitem__()
-#   -   __len__()
-#   -   __contains__()
-#
-#   -   __str__()   – value 'stype' as string
-#
-#   -   __repr__()  – representation of the value 'stype' as tuple
-#
-#   -   __eq__()    – equal compare function; is equal if it is equal with the
-#                     stype attribute of a SType object or a tuple with the
-#                     correct content in the sense of SType (duck-typing manner)
-#
 #   -   _to_stype() – internal helper: converts an STypeLike object into SType
 
-#
-# We use a helper "Meta" class in order to make isinstance(obj, SType)
-# more duck_typing.
-#
-# Metaclass: _SType_Meta
-# ----------------------
-#
-
-
-# class _SType_Meta(type):
-#     """Meta class for type class 'SType'."""
-
-#     # Do not write '@classmethod' here!
-#     def __instancecheck__(cls, obj: object) -> bool:
-#         """Check if object is of type SType or has the correct signature as tuple.
-
-#         The generalised signature is: tuple[int >= 0, Colon, EllipsisType]
-
-#         But type can also be a boolean or None for special cases by using in sndarray.
-
-#         This signature is the format/type after convertion with _to_stype() what will
-#         be used by initializing or setting the value of a SType class instance.
-
-#         """
-#         # We check for the restricted format version of the shape description
-#         #      >>   (tuple[int >= 0, ColonType, EllipsisType])   <<
-#         # Thats the format after a _to_stype() call in SType.
-#         #
-#         if not DO_TYPECHECK:
-#             return True
-#         # If it is a class SType instance, so it is converted and
-#         # we know that is compatible with
-#         if obj is cls:
-#             return True
-#         if isinstance(obj, tuple):
-#             if len(obj) > 0:  # tuple has elements
-#                 for element in obj:
-#                     if isinstance(element, int):
-#                         if element >= 0:
-#                             continue  # element is non-negativ integer
-#                     elif isinstance(element, Colon):
-#                         continue
-#                     elif isinstance(element, EllipsisType):
-#                         continue  # element ok: Ellipsis
-#                     else:
-#                         return False  # element is not valid :-(
-#             else:
-#                 return False  # tuple is empty :-(
-#         else:
-#             return False  # no tuple :-(
-#         return True  # Done: Ok. :-)
-
-#     def __call__(
-#         cls,
-#         *args,
-#         **kwargs,
-#     ) -> "_SType_Meta":  # Don't write pragma @classmethod before this method!
-#         if not args and not kwargs:
-#             return cls
-#         value = args[0] if args else kwargs["stype_like"]
-#         return super().__call__(value)
-
-
-#
-# SType implementation
-# --------------------
-#
-
-
 class SType(tuple):
-    """Shape format descriptor.
-
-    Has the functions as:
-
-    - tuple based data type to describe shape restrictions (as more restricted format than STypeLike)
-    - converter from STypeLike shape restriction to tuple based SType
-    - checker for numpy.ndarray shape against the SType shape restriction
-
-    SType(":, 3, ...") == (Colon, 3, ...)
-
-    SType(":, 2").check_ndarray(np.asarray([[1, 2], [3,4], [5,6]])) == True
-
-    """
+    """Shape format descriptor."""
 
     __slots__ = ()
 
     def __new__(cls, stype_like: STypeLike) -> "SType":
         """Create a instance of SType with a value what is of type SType or convertible into it."""
         if not isinstance(stype_like, SType):
-            self._stype = self._to_stype(stype_like)
-        else:
-            self._stype = stype_like
+            stype_like = cls._to_stype(stype_like)
+        return super().__new__(cls, stype_like)
 
-
-    @classmethod
-    def _to_stype(cls, shape: STypeLike) -> "SType":  # noqa: C901
+    @staticmethod
+    def _to_stype(shape: STypeLike) -> "SType":  # noqa: C901
         """Make any STypeLike object to a SType signature as a more standardised writing of the strictly typed shape."""
         # Note: Since we change a positive non-integer into signed integer by a loop and indexing
         #       at the end, we create a list at first and convert it to a tuple at last. (Tuple
         #       elements can not be overwritten.)
         try:
-            if isinstance(shape, cls | None | bool):
-                return shape
             if isinstance(shape, str):
                 # we have a string with or without a list inside; have to convert
                 shape = _filter_brackets_spaces_from_string(shape)
@@ -492,7 +392,7 @@ class SType(tuple):
             a_shape = array.shape
         else:
             a_shape = np.array(array).shape
-        stype = self._stype  # maybe we cut out ellipsis later, so we copy it here
+        stype = self  # maybe we cut out ellipsis later, so we copy it here
         try:
             # we remove dimensions in case an ellipsis is given at the
             # beginning or the end
@@ -523,37 +423,6 @@ class SType(tuple):
 
         # if we are here, so shape is ok
         return True
-
-    def __eq__(self, other: STypeLike | bool | None) -> bool:
-        """Check the value against an other valid value."""
-        if isinstance(other, tuple | bool | None):
-            return self._stype == other
-        if isinstance(other, SType):
-            return self._stype == other._stype
-        if isinstance(other, STypeLike):
-            return self._stype == SType(other)
-        return False
-
-    def __iter__(self) -> Iterator:
-        """Implement iter(self)."""
-        return iter(self._stype)
-
-    def __getitem__(self, index: int) -> Colon | EllipsisType | int:
-        """Implement getitem(self)."""
-        return self._stype[index]
-
-    def __len__(self) -> int:
-        """Return len(self)."""
-        return len(self._stype)
-
-    def __str__(self) -> str:
-        """Return the string representation."""
-        return str(self._stype)
-
-    def __contains__(self, item: Any) -> bool:  # noqa: ANN401
-        """Return key in self."""
-        return item in self._stype
-
 
 #
 # Ending: SType
@@ -588,7 +457,7 @@ class sndarray(np.ndarray):  # noqa: N801, Compatible naming to type numpy.ndarr
         dtype: np.dtype | None = None,
         order: NPOrder | None = None,
         *,
-        stype: STypeLike | None = None,
+        stype: STypeLike | bool | None = None,
         auto_shape_check: bool = False,
         device: Literal["cpu"] | None = None,
         copy: bool | None = None,
@@ -622,12 +491,9 @@ class sndarray(np.ndarray):  # noqa: N801, Compatible naming to type numpy.ndarr
         if isinstance(stype_like, bool):
             if stype_like:
                 # its boolean 'True'; means: Take array's current shape as stype.
-                self._stype = self.shape
+                self._stype = SType(self.shape)
             # 'False' has no meaning.
             return
-        assert isinstance(stype_like, STypeLike), ValueError(
-            "'stype_like' has wrong data type.",
-        )
         self._stype = SType(stype_like)
 
     def check_stype(self, stype_like: STypeLike | None = None) -> bool:
@@ -649,10 +515,10 @@ class sndarray(np.ndarray):  # noqa: N801, Compatible naming to type numpy.ndarr
 
         """
         if stype_like is not None:
-            assert isinstance(stype_like, STypeLike), ValueError(
-                "Parameter 'stype_like' is not STypeLike.",
-            )
             self._stype = SType(stype_like)
+        elif self._stype is None:
+            msg = "'check_stype()' requested, but 'stype' property not yet set or assigned."
+            raise AttributeError(msg)
         return self._stype.check_ndarray(self.__array__(copy=False))
 
     #

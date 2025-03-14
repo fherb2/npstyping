@@ -6,7 +6,7 @@ from npstyping.npstyping import (
     Colon,
     _STypeLike_Meta,
     STypeLike,
-    _SType_Meta,
+ #   _SType_Meta,
     SType,
     sndarray,
 )
@@ -210,128 +210,17 @@ SType_convert_positive_list = [
     ("{..., 3, :}", (..., 3, ":")),
 ]
 
-# for acceptance as STypeLike values
-SType_positiv_test_list = [
-    ((3,)),
-    ((":",)),
-    ((...,)),
-    ((3, 2)),
-    ((":", 2)),
-    ((..., 2)),
-    ((3, ...)),
-    ((":", ...)),
-    ((..., 3, 10)),
-    ((":", 3, 10)),
-    ((..., ":", 10)),
-    ((..., 3, ":")),
-    ((..., 4, ...)),
-]
-
-SType_negativ_test_list = [
-    ([3]),
-    ("[3]"),
-    ("(3)"),
-    ("3"),
-    ([":"]),
-    ("[:]"),
-    ("(:)"),
-    (":"),
-    ([...]),
-    (...),
-    ("..."),
-    ("[...]"),
-    ("(...)"),
-    ([3, 2]),
-    ([":", 2]),
-    ([..., 2]),
-    ("[..., 2]"),
-    ("..., 2"),
-    ([3, ...]),
-    ("[3, ...]"),
-    ("3, ..."),
-    ([":", ...]),
-    ("[:, ...]"),
-    (":, ..."),
-    ("(:, ...)"),
-    ("[:, 2]"),
-    ("(:, 2)"),
-    (":, 2"),
-    ([..., 3, 10]),
-    ("[..., 3, 10]"),
-    ("(..., 3, 10)"),
-    ("..., 3, 10"),
-    ([":", 3, 10]),
-    ("(:, 3, 10)"),
-    ("[:, 3, 10]"),
-    (":, 3, 10"),
-    ([..., ":", 10]),
-    ("[..., :, 10]"),
-    ("..., :, 10"),
-    ("(..., :, 10)"),
-    ([..., 3, ":"]),
-    ("[..., 3, :]"),
-    ("..., 3, :"),
-    ("(..., 3, :)"),
-    ("{..., 3, :}"),
-    ("3,2"),
-    ("[3, 2]"),
-    ({"a": 3}),
-    ("[3"),
-    ("3)"),
-    ("3.1"),
-    (":]"),
-    ("()"),
-    ("[..]"),
-    ("[....]"),
-    ("[..., :, -10]"),
-    ("...., :, 10"),
-    ("(.., :, 10)"),
-    ("([:, 2])", (":", 2)),
-    ({..., 3, ":"}, (..., 3, ":")),
-]
-
-
 def test_SType_type():
     a = SType
     b = SType((2))
     assert not isinstance(a, SType)
     assert isinstance(a, type)
     assert isinstance(b, SType)
-
-
-a = SType
-b = SType((2))
-print(f"{isinstance(a, SType)=}")
-print(f"{isinstance(a, STypeLike)=}")
-print(f"{isinstance(a, type)=}")
-print(f"{isinstance(b, SType)=}")
-print(f"{isinstance(b, STypeLike)=}")
-print(f"{isinstance(b, type)=}")
-
-
-
-@pytest.mark.parametrize("in1", SType_positiv_test_list)
-def test_SType_check_instance(in1):
-    assert isinstance(in1, SType)
-
-
-@pytest.mark.parametrize("in1", SType_negativ_test_list)
-def test_SType_check_not_instance(in1):
-    assert not isinstance(in1, SType)
-
-
-# check import cababilities (StypeLike used as parameter,
-# result is tuple)
-
+    assert not isinstance(b, type)
 
 @pytest.mark.parametrize("in1, out1", SType_convert_positive_list)
 def test_SType_check_result(in1, out1):
-    a = (SType(in1) == out1)
-    print(a)
     assert SType(in1) == out1
-
-
-# check of the sarray-test-cababilities
 
 array_test_list = [
     ((3), np.array((1, 2, 3)), True),
