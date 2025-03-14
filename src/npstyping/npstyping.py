@@ -182,9 +182,9 @@ class _STypeLike_Meta(type):  # noqa: N801
         if not DO_TYPECHECK:
             return True
         try:
-            # Is instance of SType (includes None, bool, tuple and SType
-            # class, since its tested in _SType_Meta?
-            if isinstance(obj, SType | None | bool):
+            # If it is SType, so it is tested by importing in SType
+            # and so it is cleare that it is also STypeLike:
+            if isinstance(obj, SType):
                 return True
 
             # is convertible into SType?
@@ -323,59 +323,58 @@ class STypeLike(metaclass=_STypeLike_Meta):
 #
 
 
-class _SType_Meta(type):  # noqa: N801
-    """Meta class for type class 'SType'."""
+# class _SType_Meta(type):
+#     """Meta class for type class 'SType'."""
 
-    # Do not write '@classmethod' here!
-    def __instancecheck__(cls, obj: object) -> bool:  # noqa: C901
-        """Check if object is of type SType or has the correct signature as tuple.
+#     # Do not write '@classmethod' here!
+#     def __instancecheck__(cls, obj: object) -> bool:
+#         """Check if object is of type SType or has the correct signature as tuple.
 
-        The generalised signature is: tuple[int >= 0, Colon, EllipsisType]
+#         The generalised signature is: tuple[int >= 0, Colon, EllipsisType]
 
-        But type can also be a boolean or None for special cases by using in sndarray.
+#         But type can also be a boolean or None for special cases by using in sndarray.
 
-        This signature is the format/type after convertion with _to_stype() what will
-        be used by initializing or setting the value of a SType class instance.
+#         This signature is the format/type after convertion with _to_stype() what will
+#         be used by initializing or setting the value of a SType class instance.
 
-        """
-        # We check for the restricted format version of the shape description
-        #      >>   (tuple[int >= 0, ColonType, EllipsisType])   <<
-        # Thats the format after a _to_stype() call in SType.
-        #
-        if not DO_TYPECHECK:
-            return True
-        if obj is cls:
-            return True
-        if isinstance(obj, None | bool):
-            # Special cases. It's ok.
-            return True
-        if isinstance(obj, tuple):
-            if len(obj) > 0:  # tuple has elements
-                for element in obj:
-                    if isinstance(element, int):
-                        if element >= 0:
-                            continue  # element is non-negativ integer
-                    elif isinstance(element, Colon):
-                        continue
-                    elif isinstance(element, EllipsisType):
-                        continue  # element ok: Ellipsis
-                    else:
-                        return False  # element is not valid :-(
-            else:
-                return False  # tuple is empty :-(
-        else:
-            return False  # no tuple :-(
-        return True  # Done: Ok. :-)
+#         """
+#         # We check for the restricted format version of the shape description
+#         #      >>   (tuple[int >= 0, ColonType, EllipsisType])   <<
+#         # Thats the format after a _to_stype() call in SType.
+#         #
+#         if not DO_TYPECHECK:
+#             return True
+#         # If it is a class SType instance, so it is converted and
+#         # we know that is compatible with
+#         if obj is cls:
+#             return True
+#         if isinstance(obj, tuple):
+#             if len(obj) > 0:  # tuple has elements
+#                 for element in obj:
+#                     if isinstance(element, int):
+#                         if element >= 0:
+#                             continue  # element is non-negativ integer
+#                     elif isinstance(element, Colon):
+#                         continue
+#                     elif isinstance(element, EllipsisType):
+#                         continue  # element ok: Ellipsis
+#                     else:
+#                         return False  # element is not valid :-(
+#             else:
+#                 return False  # tuple is empty :-(
+#         else:
+#             return False  # no tuple :-(
+#         return True  # Done: Ok. :-)
 
-    def __call__(
-        cls,
-        *args,
-        **kwargs,
-    ) -> "_SType_Meta":  # Don't write pragma @classmethod before this method!
-        if not args and not kwargs:
-            return cls
-        value = args[0] if args else kwargs["stype_like"]
-        return super().__call__(value)
+#     def __call__(
+#         cls,
+#         *args,
+#         **kwargs,
+#     ) -> "_SType_Meta":  # Don't write pragma @classmethod before this method!
+#         if not args and not kwargs:
+#             return cls
+#         value = args[0] if args else kwargs["stype_like"]
+#         return super().__call__(value)
 
 
 #
@@ -384,7 +383,7 @@ class _SType_Meta(type):  # noqa: N801
 #
 
 
-class SType(metaclass=_SType_Meta):
+class SType(tuple):
     """Shape format descriptor.
 
     Has the functions as:
@@ -399,25 +398,15 @@ class SType(metaclass=_SType_Meta):
 
     """
 
-    def __init__(self, stype_like: STypeLike) -> None:
+    __slots__ = ()
+
+    def __new__(cls, stype_like: STypeLike) -> "SType":
         """Create a instance of SType with a value what is of type SType or convertible into it."""
         if not isinstance(stype_like, SType):
             self._stype = self._to_stype(stype_like)
         else:
             self._stype = stype_like
 
-    @property
-    def stype(self) -> tuple[Colon | int | EllipsisType]:
-        """Get the SType value."""
-        return self._stype
-
-    @stype.getter
-    def stype(self, stype_like: STypeLike) -> None:
-        """Set SType with a SType value or a convertible value (STypeLike)."""
-        if isinstance(stype_like, SType):
-            self._stype = stype_like
-        else:
-            self._stype = self._to_stype(stype_like)
 
     @classmethod
     def _to_stype(cls, shape: STypeLike) -> "SType":  # noqa: C901

@@ -23,6 +23,7 @@ def test_ColonType_types():
     a = Colon
     b = ":"
     assert isinstance(a, Colon)
+    assert isinstance(a, type)
     assert isinstance(b, Colon)
 
 
@@ -127,7 +128,8 @@ STypeLike_negativ_test_list = [
 
 def test_STypeLike_input_values_check_special_cases():
     a = STypeLike
-    assert isinstance(a, STypeLike)
+    assert not isinstance(a, STypeLike)
+    assert isinstance(a, type)
 
 
 @pytest.mark.parametrize("in1", STypeLike_positiv_test_list)
@@ -290,14 +292,22 @@ SType_negativ_test_list = [
 
 
 def test_SType_type():
-    assert isinstance(SType, _SType_Meta)
     a = SType
     b = SType((2))
-    isinstance(a, SType)
-    isinstance(b, SType)
+    assert not isinstance(a, SType)
+    assert isinstance(a, type)
+    assert isinstance(b, SType)
 
 
-# check values against "SType"
+a = SType
+b = SType((2))
+print(f"{isinstance(a, SType)=}")
+print(f"{isinstance(a, STypeLike)=}")
+print(f"{isinstance(a, type)=}")
+print(f"{isinstance(b, SType)=}")
+print(f"{isinstance(b, STypeLike)=}")
+print(f"{isinstance(b, type)=}")
+
 
 
 @pytest.mark.parametrize("in1", SType_positiv_test_list)
